@@ -43,7 +43,7 @@ const Checkout = () => {
               <span>🔍</span>
               <input 
                 type="text" 
-                placeholder="Search products by name…" 
+                placeholder="Search product by name…" 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
