@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { usePos } from '../context/PosContext';
+import { Search } from 'lucide-react';
 
 const Checkout = () => {
   const { products } = useInventory();
@@ -14,8 +15,8 @@ const Checkout = () => {
     getTotals, processCheckout, currentRef,
   } = usePos();
 
-  const [search, setSearch]         = useState('');
-  const [activeCat, setActiveCat]   = useState('All');
+  const [search, setSearch] = useState('');
+  const [activeCat, setActiveCat] = useState('All');
   const [receiptData, setReceiptData] = useState(null);
 
   const categories = ['All', 'Beverages', 'Staples', 'Dairy', 'Cooking', 'Bakery', 'Snacks'];
@@ -58,7 +59,7 @@ const Checkout = () => {
 
             {/* Search bar */}
             <div className="pos-search-bar">
-              <Search size={16} style={{ color: 'var(--text-light)', flexShrink: 0 }} />
+              <Search size={18} style={{ color: 'var(--text-light)' }} />
               <input
                 type="text"
                 placeholder="Search product by name…"

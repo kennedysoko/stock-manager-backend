@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useInventory } from '../context/InventoryContext';
+import { Package, AlertTriangle, ShoppingCart, DollarSign, Bell } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -12,7 +13,7 @@ const Dashboard = () => {
   return (
     <section className="page active" id="page-dashboard">
       <div className="page-header">
-        <h1>Good morning, {user?.name.split(' ')[0] || 'Admin'} 👋</h1>
+        <h1>Welcome back, {user?.name.split(' ')[0] || 'Admin'}</h1>
         <p>Here's your inventory overview for today</p>
       </div>
 
@@ -21,25 +22,33 @@ const Dashboard = () => {
           <div className="stat-label">Total Products</div>
           <div className="stat-val">{products.length}</div>
           <div className="stat-change up">↑ Active tracking</div>
-          <div className="stat-icon green">📦</div>
+          <div className="stat-icon green">
+            <Package size={20} />
+          </div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Low Stock Items</div>
           <div className="stat-val">{lowStockProducts.length}</div>
           <div className="stat-change down">↓ Needs attention</div>
-          <div className="stat-icon red">⚠️</div>
+          <div className="stat-icon red">
+            <AlertTriangle size={20} />
+          </div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Orders Pending</div>
           <div className="stat-val">3</div>
           <div className="stat-change up">↑ 1 new today</div>
-          <div className="stat-icon amber">🛒</div>
+          <div className="stat-icon amber">
+            <ShoppingCart size={20} />
+          </div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Total Stock Value</div>
           <div className="stat-val">MK{(totalValue / 1000000).toFixed(1)}M</div>
           <div className="stat-change up">↑ Live metrics</div>
-          <div className="stat-icon blue">💰</div>
+          <div className="stat-icon blue">
+            <DollarSign size={20} />
+          </div>
         </div>
       </div>
 
@@ -78,7 +87,10 @@ const Dashboard = () => {
 
         <div className="card">
           <div className="card-header">
-            <div className="card-title">🔔 Low Stock Alerts</div>
+            <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Bell size={18} />
+              Low Stock Alerts
+            </div>
             <span className="card-action">View all →</span>
           </div>
           <div className="card-body" style={{ padding: '12px 16px', maxHeight: '250px', overflowY: 'auto' }}>

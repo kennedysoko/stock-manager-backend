@@ -1,19 +1,20 @@
 import React from 'react';
+import { Home, Package, Folder, Receipt, ShoppingCart, Truck, Bell, TrendingUp, BarChart2, Settings } from 'lucide-react';
 
 const Sidebar = ({ activePage, setActivePage, isSidebarOpen, setSidebarOpen }) => {
   const navItems = [
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'products', icon: '📦', label: 'Products' },
-    { id: 'inventory', icon: '🗂️', label: 'Inventory' },
+    { id: 'dashboard', icon: <Home size={18} />, label: 'Dashboard' },
+    { id: 'products', icon: <Package size={18} />, label: 'Products' },
+    { id: 'inventory', icon: <Folder size={18} />, label: 'Inventory' },
     { type: 'label', label: 'Operations' },
-    { id: 'checkout', icon: '🧾', label: 'Checkout / POS' },
-    { id: 'orders', icon: '🛒', label: 'Orders', badge: 3 },
-    { id: 'deliveries', icon: '🚚', label: 'Deliveries' },
-    { id: 'alerts', icon: '🔔', label: 'Alerts', badge: 5 },
+    { id: 'checkout', icon: <Receipt size={18} />, label: 'Checkout / POS' },
+    { id: 'orders', icon: <ShoppingCart size={18} />, label: 'Orders', badge: 3 },
+    { id: 'deliveries', icon: <Truck size={18} />, label: 'Deliveries' },
+    { id: 'alerts', icon: <Bell size={18} />, label: 'Alerts', badge: 5 },
     { type: 'label', label: 'Insights' },
-    { id: 'forecasting', icon: '📈', label: 'Forecasting' },
-    { id: 'reports', icon: '📊', label: 'Reports' },
-    { id: 'settings', icon: '⚙️', label: 'Settings' }
+    { id: 'forecasting', icon: <TrendingUp size={18} />, label: 'Forecasting' },
+    { id: 'reports', icon: <BarChart2 size={18} />, label: 'Reports' },
+    { id: 'settings', icon: <Settings size={18} />, label: 'Settings' }
   ];
 
   return (
