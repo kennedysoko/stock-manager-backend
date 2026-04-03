@@ -10,7 +10,7 @@ const EMOJI_MAP = {
 };
 
 const defaultForm = {
-  name: '', cat: 'Beverages', price: '', stock: '', min: '', supplier: 'Peoples Trading Co.', notes: '',
+  name: '', cat: 'Beverages', price: '', stock: '', min: '', supplier: 'Peoples Trading Co.', notes: '', image: null,
 };
 
 const Products = () => {
@@ -29,6 +29,14 @@ const Products = () => {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
     if (errors[name]) setErrors(er => ({ ...er, [name]: '' }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setForm(f => ({ ...f, image: ev.target.result }));
+    reader.readAsDataURL(file);
   };
 
   const validate = () => {
@@ -50,6 +58,7 @@ const Products = () => {
       stock: Number(form.stock),
       min: Number(form.min),
       emoji: EMOJI_MAP[form.cat] || '📦',
+      image: form.image || null,
     });
     setShowModal(false);
     setForm(defaultForm);
@@ -107,7 +116,11 @@ const Products = () => {
 
                 return (
                   <tr key={p.id}>
-                    <td><div className="product-img">{p.emoji}</div></td>
+                    <td><div className="product-img">
+                      {p.image
+                        ? <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />
+                        : p.emoji}
+                    </div></td>
                     <td>
                       <div className="product-name">{p.name}</div>
                       <div className="product-id">#{p.id}</div>
@@ -220,6 +233,37 @@ const Products = () => {
               <select name="supplier" value={form.supplier} onChange={handleChange}>
                 {SUPPLIERS.map(s => <option key={s}>{s}</option>)}
               </select>
+            </div>
+
+            <div className="form-group">
+              <label>Product Image (Optional)</label>
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                border: '1.5px dashed var(--border)', borderRadius: 'var(--radius-sm)',
+                padding: '10px 14px', cursor: 'pointer', background: 'var(--bg)',
+                transition: 'border-color .15s',
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+              >
+                {form.image
+                  ? <img src={form.image} alt="preview" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+                  : <span style={{ fontSize: '1.6rem' }}>🖼️</span>
+                }
+                <span style={{ fontSize: '.85rem', color: 'var(--text-muted)' }}>
+                  {form.image ? 'Click to change image' : 'Click to upload image'}
+                </span>
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
+              </label>
+              {form.image && (
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, image: null }))}
+                  style={{ marginTop: 6, fontSize: '.75rem', color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  Remove image
+                </button>
+              )}
             </div>
 
             <div className="form-group">

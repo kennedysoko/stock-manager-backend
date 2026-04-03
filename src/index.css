@@ -268,7 +268,7 @@ body {
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th {
   font-size: .72rem; text-transform: uppercase; letter-spacing: .5px;
-  color: var(--text-muted); font-weight: 700; padding: 0 12px 10px;
+  color: var(--text-muted); font-weight: 700; padding: 14px 12px;
   text-align: left; border-bottom: 1px solid var(--border);
 }
 .data-table td {
