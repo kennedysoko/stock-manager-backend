@@ -123,7 +123,7 @@ const Checkout = () => {
             <div className="cart-customer">
               <input
                 type="text"
-                placeholder="👤 Customer name (optional)"
+                placeholder="Customer name (optional)"
                 value={customer}
                 onChange={e => setCustomer(e.target.value)}
               />
@@ -133,7 +133,9 @@ const Checkout = () => {
             <div className="cart-items">
               {cart.length === 0 ? (
                 <div className="cart-empty">
-                  <div className="cart-empty-icon">🛒</div>
+                  <div className="cart-empty-icon">
+                    <ShoppingCart size={44} strokeWidth={1.2} style={{ opacity: .35 }} />
+                  </div>
                   <p>No items yet.<br />Click a product to add it.</p>
                 </div>
               ) : (
