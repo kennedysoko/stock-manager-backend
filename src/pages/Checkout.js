@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { usePos } from '../context/PosContext';
+import { Search } from 'lucide-react';
 
 const Checkout = () => {
   const { products } = useInventory();
@@ -40,7 +41,7 @@ const Checkout = () => {
           {/* LEFT: Product Grid */}
           <div className="pos-products-panel">
             <div className="pos-search-bar">
-              <span>🔍</span>
+              <Search size={18} style={{ color: 'var(--text-light)' }} />
               <input 
                 type="text" 
                 placeholder="Search product by name…" 
