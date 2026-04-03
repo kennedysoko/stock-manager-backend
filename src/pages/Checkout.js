@@ -44,7 +44,7 @@ const Checkout = () => {
               <Search size={18} style={{ color: 'var(--text-light)' }} />
               <input 
                 type="text" 
-                placeholder="Search products by name…" 
+                placeholder="Search product by name…" 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
