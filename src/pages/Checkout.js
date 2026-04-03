@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import {
+  Search, ShoppingCart, User, Minus, Plus, X,
+  CreditCard, Trash2, Printer, Receipt, Tag,
+} from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { usePos } from '../context/PosContext';
 
@@ -40,7 +44,7 @@ const Checkout = () => {
 
         {/* Page header */}
         <div className="page-header" style={{ marginBottom: 14 }}>
-          <h1>🧾 Checkout — Point of Sale</h1>
+          <h1><Receipt size={22} style={{ marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)' }} />Checkout — Point of Sale</h1>
           <p>Add items to the cart and process customer sales</p>
         </div>
 
@@ -54,7 +58,7 @@ const Checkout = () => {
 
             {/* Search bar */}
             <div className="pos-search-bar">
-              <span style={{ color: 'var(--text-light)' }}>🔍</span>
+              <Search size={16} style={{ color: 'var(--text-light)', flexShrink: 0 }} />
               <input
                 type="text"
                 placeholder="Search product by name…"
@@ -111,7 +115,8 @@ const Checkout = () => {
             {/* Cart header */}
             <div className="cart-header">
               <h3>
-                🛒 Cart&nbsp;
+                <ShoppingCart size={18} style={{ marginRight: 6 }} />
+                Cart&nbsp;
                 <span className="cart-count">{cartQty}</span>
               </h3>
               <span style={{ fontSize: '.75rem', color: 'var(--text-muted)', fontFamily: "'DM Mono',monospace" }}>
@@ -123,7 +128,7 @@ const Checkout = () => {
             <div className="cart-customer">
               <input
                 type="text"
-                placeholder="👤 Customer name (optional)"
+                placeholder="Customer name (optional)"
                 value={customer}
                 onChange={e => setCustomer(e.target.value)}
               />
@@ -133,7 +138,9 @@ const Checkout = () => {
             <div className="cart-items">
               {cart.length === 0 ? (
                 <div className="cart-empty">
-                  <div className="cart-empty-icon">🛒</div>
+                  <div className="cart-empty-icon">
+                    <ShoppingCart size={44} strokeWidth={1.2} style={{ opacity: .35 }} />
+                  </div>
                   <p>No items yet.<br />Click a product to add it.</p>
                 </div>
               ) : (
@@ -147,14 +154,20 @@ const Checkout = () => {
                       </div>
                     </div>
                     <div className="qty-ctrl">
-                      <button className="qty-btn" onClick={() => changeQty(item.id, -1)}>&#8722;</button>
+                      <button className="qty-btn" onClick={() => changeQty(item.id, -1)}>
+                        <Minus size={12} />
+                      </button>
                       <span className="qty-val">{item.qty}</span>
-                      <button className="qty-btn" onClick={() => changeQty(item.id, 1)}>+</button>
+                      <button className="qty-btn" onClick={() => changeQty(item.id, 1)}>
+                        <Plus size={12} />
+                      </button>
                     </div>
                     <div className="cart-item-subtotal">
                       MK {(item.price * item.qty).toLocaleString()}
                     </div>
-                    <button className="cart-remove" onClick={() => removeFromCart(item.id)}>&#x2715;</button>
+                    <button className="cart-remove" onClick={() => removeFromCart(item.id)}>
+                      <X size={14} />
+                    </button>
                   </div>
                 ))
               )}
@@ -163,6 +176,9 @@ const Checkout = () => {
             {/* Summary — only visible when cart has items */}
             {cart.length > 0 && (
               <div className="cart-summary">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, fontSize: '.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  <Tag size={13} /> Discount
+                </div>
                 <div className="discount-row">
                   <input
                     type="number"
@@ -194,10 +210,10 @@ const Checkout = () => {
                 disabled={cart.length === 0}
                 onClick={handleCheckout}
               >
-                💳 Complete Sale
+                <CreditCard size={18} /> Complete Sale
               </button>
               <button className="btn btn-outline btn-clear" onClick={clearCart}>
-                🗑 Clear Cart
+                <Trash2 size={15} /> Clear Cart
               </button>
             </div>
 
@@ -267,7 +283,7 @@ const Checkout = () => {
             </div>
 
             {/* Footer */}
-            <div className="receipt-footer">Thank you for shopping with us! 🙏</div>
+            <div className="receipt-footer">Thank you for shopping with us!</div>
 
             {/* Actions */}
             <div className="receipt-actions">
@@ -283,7 +299,7 @@ const Checkout = () => {
                 style={{ flex: 1, justifyContent: 'center' }}
                 onClick={() => window.print()}
               >
-                🖨 Print
+                <Printer size={16} /> Print
               </button>
             </div>
 
