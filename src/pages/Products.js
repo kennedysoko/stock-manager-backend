@@ -1,11 +1,66 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 
+const CATEGORIES = ['Beverages', 'Staples', 'Cooking', 'Dairy', 'Bakery', 'Snacks', 'Other'];
+const SUPPLIERS = ['Peoples Trading Co.', 'Metro Wholesale', 'City Distributors', 'Farm Fresh Ltd', 'Other'];
+
+const EMOJI_MAP = {
+  Beverages: '🥤', Staples: '🌽', Cooking: '🫙',
+  Dairy: '🥛', Bakery: '🍞', Snacks: '🍪', Other: '📦',
+};
+
+const defaultForm = {
+  name: '', cat: 'Beverages', price: '', stock: '', min: '', supplier: 'Peoples Trading Co.', notes: '',
+};
+
 const Products = () => {
-  const { products } = useInventory();
+  const { products, addProduct } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState(defaultForm);
+  const [errors, setErrors] = useState({});
+
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+    if (errors[name]) setErrors(er => ({ ...er, [name]: '' }));
+  };
+
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = 'Product name is required';
+    if (!form.price || isNaN(form.price) || Number(form.price) <= 0) e.price = 'Enter a valid price';
+    if (form.stock === '' || isNaN(form.stock) || Number(form.stock) < 0) e.stock = 'Enter a valid quantity';
+    if (form.min === '' || isNaN(form.min) || Number(form.min) < 0) e.min = 'Enter a valid min level';
+    return e;
+  };
+
+  const handleSubmit = () => {
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    addProduct({
+      name: form.name.trim(),
+      cat: form.cat,
+      price: Number(form.price),
+      stock: Number(form.stock),
+      min: Number(form.min),
+      emoji: EMOJI_MAP[form.cat] || '📦',
+    });
+    setShowModal(false);
+    setForm(defaultForm);
+    setErrors({});
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setForm(defaultForm);
+    setErrors({});
+  };
 
   return (
     <section className="page active" id="page-products">
@@ -17,11 +72,17 @@ const Products = () => {
         <div className="toolbar-left">
           <div className="search-field">
             <span>🔍</span>
-            <input type="text" placeholder="Search by name…" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Search by name or ID…"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
-        <button className="btn btn-primary" onClick={() => alert('Add Product feature mock')}>+ Add Product</button>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Add Product</button>
       </div>
+
       <div className="card">
         <div className="products-table-wrap">
           <table className="data-table">
@@ -66,10 +127,115 @@ const Products = () => {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan="8" style={{textAlign:'center', padding:'24px', color:'var(--text-muted)'}}>No products found.</td></tr>
+                <tr>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                    No products found.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Add Product Modal */}
+      <div className={`modal-overlay${showModal ? ' open' : ''}`} onClick={e => e.target === e.currentTarget && handleClose()}>
+        <div className="modal">
+          <div className="modal-header">
+            <h2>Add New Product</h2>
+            <button className="modal-close" onClick={handleClose}>✕</button>
+          </div>
+          <div className="modal-body">
+            <div className="form-row">
+              <div className="form-group">
+                <label>Product Name</label>
+                <input
+                  name="name"
+                  placeholder="e.g. Coca-Cola 500ml"
+                  value={form.name}
+                  onChange={handleChange}
+                  style={errors.name ? { borderColor: 'var(--danger)' } : {}}
+                />
+                {errors.name && <span style={{ fontSize: '.75rem', color: 'var(--danger)' }}>{errors.name}</span>}
+              </div>
+              <div className="form-group">
+                <label>Product ID</label>
+                <input value="Auto-generated" disabled style={{ background: 'var(--surface2)', color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Category</label>
+                <select name="cat" value={form.cat} onChange={handleChange}>
+                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Unit Price (MK)</label>
+                <input
+                  name="price"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={form.price}
+                  onChange={handleChange}
+                  style={errors.price ? { borderColor: 'var(--danger)' } : {}}
+                />
+                {errors.price && <span style={{ fontSize: '.75rem', color: 'var(--danger)' }}>{errors.price}</span>}
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Initial Quantity</label>
+                <input
+                  name="stock"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={form.stock}
+                  onChange={handleChange}
+                  style={errors.stock ? { borderColor: 'var(--danger)' } : {}}
+                />
+                {errors.stock && <span style={{ fontSize: '.75rem', color: 'var(--danger)' }}>{errors.stock}</span>}
+              </div>
+              <div className="form-group">
+                <label>Min Stock Level</label>
+                <input
+                  name="min"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={form.min}
+                  onChange={handleChange}
+                  style={errors.min ? { borderColor: 'var(--danger)' } : {}}
+                />
+                {errors.min && <span style={{ fontSize: '.75rem', color: 'var(--danger)' }}>{errors.min}</span>}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Supplier</label>
+              <select name="supplier" value={form.supplier} onChange={handleChange}>
+                {SUPPLIERS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Notes (Optional)</label>
+              <textarea
+                name="notes"
+                placeholder="Any notes about this product…"
+                value={form.notes}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-outline" onClick={handleClose}>Cancel</button>
+            <button className="btn btn-primary" onClick={handleSubmit}>Add Product</button>
+          </div>
         </div>
       </div>
     </section>
