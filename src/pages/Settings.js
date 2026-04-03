@@ -87,18 +87,18 @@ const Settings = () => {
               </div>
             </div>
 
-            <div className="grid-2" style={{ gap: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
               <div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Role</div>
                 <div style={{ fontWeight: 500 }}>{selectedUser.role}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Email</div>
-                <div style={{ fontWeight: 500 }}>{selectedUser.email || 'Not provided'}</div>
-              </div>
-              <div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Phone</div>
                 <div style={{ fontWeight: 500 }}>{selectedUser.phone || 'Not provided'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Email</div>
+                <div style={{ fontWeight: 500 }}>{selectedUser.email || 'Not provided'}</div>
               </div>
             </div>
 
