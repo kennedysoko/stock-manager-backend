@@ -5,7 +5,7 @@ const Sidebar = ({ activePage, setActivePage, isSidebarOpen, setSidebarOpen }) =
   const navItems = [
     { id: 'dashboard', icon: <Home size={18} />, label: 'Dashboard' },
     { id: 'products', icon: <Package size={18} />, label: 'Products' },
-    { id: 'inventory', icon: <Folder size={18} />, label: 'Inventory' },
+    { id: 'inventory', icon: <Folder size={18} />, label: 'Inventory Tracking' },
     { type: 'label', label: 'Operations' },
     { id: 'checkout', icon: <Receipt size={18} />, label: 'Checkout / POS' },
     { id: 'orders', icon: <ShoppingCart size={18} />, label: 'Orders', badge: 3 },

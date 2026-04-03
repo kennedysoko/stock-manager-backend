@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
 const pageTitles = {
-  dashboard: 'Dashboard', products: 'Products', inventory: 'Inventory',
+  dashboard: 'Dashboard', products: 'Products', inventory: 'Inventory Tracking',
   checkout: 'Checkout / POS', orders: 'Purchase Orders', 
   deliveries: 'Deliveries', alerts: 'Alerts',
   forecasting: 'Demand Forecasting', reports: 'Reports', settings: 'Settings'
