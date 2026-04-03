@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
+import { Search } from 'lucide-react';
 
 const Products = () => {
   const { products } = useInventory();
@@ -16,7 +17,7 @@ const Products = () => {
       <div className="toolbar">
         <div className="toolbar-left">
           <div className="search-field">
-            <span>🔍</span>
+            <Search size={18} style={{ color: 'var(--text-light)' }} />
             <input type="text" placeholder="Search by name…" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
         </div>
