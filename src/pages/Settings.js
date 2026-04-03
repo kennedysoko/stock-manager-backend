@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 const Settings = () => {
+  const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([
     { id: 1, name: 'Admin Kayola', role: 'Administrator', initials: 'AK', bg: '', status: 'Active' },
     { id: 2, name: 'Mary Cashier', role: 'Cashier', initials: 'MC', bg: '#3B7DD8', status: 'Active' }
@@ -44,6 +45,54 @@ const Settings = () => {
     handleClose();
   };
 
+  if (selectedUser) {
+    return (
+      <section className="page active" id="page-settings">
+        <div className="page-header">
+          <h1>User Profile</h1>
+          <p>Manage details and access for {selectedUser.name}</p>
+        </div>
+        
+        <div className="card" style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="card-title">User Details</div>
+            <button className="btn btn-outline btn-sm" onClick={() => setSelectedUser(null)}>Back to Settings</button>
+          </div>
+          <div className="card-body">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <div className="user-avatar" style={{width:'64px', height:'64px', fontSize:'1.5rem', background: selectedUser.bg || undefined}}>{selectedUser.initials}</div>
+              <div>
+                <h2 style={{ margin: 0 }}>{selectedUser.name}</h2>
+                <div style={{ color: 'var(--text-muted)' }}>@{selectedUser.username || selectedUser.name.toLowerCase().replace(' ', '')}</div>
+                <span className={`badge badge-${selectedUser.status === 'Active' ? 'green' : 'red'}`} style={{ marginTop: '8px', display: 'inline-block' }}>{selectedUser.status || 'Active'}</span>
+              </div>
+            </div>
+
+            <div className="grid-2" style={{ gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Role</div>
+                <div style={{ fontWeight: 500 }}>{selectedUser.role}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Email</div>
+                <div style={{ fontWeight: 500 }}>{selectedUser.email || 'Not provided'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Phone</div>
+                <div style={{ fontWeight: 500 }}>{selectedUser.phone || 'Not provided'}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button className="btn btn-primary" onClick={() => alert('Edit User modal coming soon!')}>Edit Details</button>
+              <button className="btn btn-outline" onClick={() => alert('Change Password modal coming soon!')}>Change Password</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="page active" id="page-settings">
       <div className="page-header">
@@ -64,7 +113,7 @@ const Settings = () => {
           <div className="card-header"><div className="card-title">User Management</div></div>
           <div className="card-body">
             {users.map(user => (
-              <div className="alert-item" key={user.id}>
+              <div className="alert-item" key={user.id} onClick={() => setSelectedUser(user)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 <div className="user-avatar" style={{ width: '32px', height: '32px', fontSize: '.75rem', background: user.bg || undefined }}>{user.initials}</div>
                 <div className="alert-info"><div className="alert-name">{user.name}</div><div className="alert-sub">{user.role}</div></div>
                 <span className="badge badge-green">{user.status}</span>
