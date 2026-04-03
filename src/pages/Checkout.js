@@ -10,10 +10,11 @@ import { usePos } from '../context/PosContext';
 const Checkout = () => {
   const { products } = useInventory();
   const {
-    cart, addToCart, changeQty, removeFromCart, clearCart,
-    discount, setDiscount, customer, setCustomer,
-    getTotals, processCheckout, currentRef,
-  } = usePos();
+    const {
+      cart, addToCart, changeQty, removeFromCart, clearCart,
+      discount, setDiscount, customer, setCustomer,
+      getTotals, processCheckout, currentRef
+    } = usePos();
 
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('All');
@@ -21,9 +22,8 @@ const Checkout = () => {
 
   const categories = ['All', 'Beverages', 'Staples', 'Dairy', 'Cooking', 'Bakery', 'Snacks'];
 
-  /* ── filtered product list ── */
-  const filtered = products.filter(p =>
-    (activeCat === 'All' || p.cat === activeCat) &&
+  const filteredProducts = products.filter(p =>
+    (currentCat === 'All' || p.cat === currentCat) &&
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -42,10 +42,8 @@ const Checkout = () => {
           CHECKOUT PAGE
       ══════════════════════════════════════════ */}
       <section className="page active" id="page-checkout">
-
-        {/* Page header */}
-        <div className="page-header" style={{ marginBottom: 14 }}>
-          <h1><Receipt size={22} style={{ marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)' }} />Checkout — Point of Sale</h1>
+        <div className="page-header" style={{ marginBottom: '14px' }}>
+          <h1>🧾 Checkout — Point of Sale</h1>
           <p>Add items to the cart and process customer sales</p>
         </div>
 
@@ -63,6 +61,9 @@ const Checkout = () => {
               <input
                 type="text"
                 placeholder="Search product by name…"
+              <input
+                type="text"
+                placeholder="Search product by name…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -73,8 +74,8 @@ const Checkout = () => {
               {categories.map(cat => (
                 <button
                   key={cat}
-                  className={`cat-pill${activeCat === cat ? ' active' : ''}`}
-                  onClick={() => setActiveCat(cat)}
+                  className={`cat-pill ${currentCat === cat ? 'active' : ''}`}
+                  onClick={() => setCurrentCat(cat)}
                 >
                   {cat}
                 </button>
@@ -83,24 +84,24 @@ const Checkout = () => {
 
             {/* Product grid */}
             <div className="pos-grid">
-              {filtered.length === 0 ? (
-                <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-muted)', padding: 40 }}>
+              {filteredProducts.map(p => (
+                <div
+                  key={p.id}
+                  className={`pos-product-card ${p.stock === 0 ? 'out-of-stock' : ''}`}
+                  onClick={() => addToCart(p.id)}
+                >
+                  <div className="pos-emoji">{p.emoji}</div>
+                  <div className="pos-pname">{p.name}</div>
+                  <div className="pos-pprice">MK {p.price.toLocaleString()}</div>
+                  <div className={`pos-pstock ${p.stock <= p.min ? 'low' : ''}`}>
+                    {p.stock === 0 ? 'Out of stock' : `${p.stock} in stock`}
+                  </div>
+                </div>
+              ))}
+              {filteredProducts.length === 0 && (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>
                   No products found
                 </div>
-              ) : (
-                filtered.map(p => (
-                  <div
-                    key={p.id}
-                    className={`pos-product-card${p.stock === 0 ? ' out-of-stock' : ''}`}
-                    onClick={() => addToCart(p.id)}
-                  >
-                    <div className="pos-pname">{p.name}</div>
-                    <div className="pos-pprice">MK {p.price.toLocaleString()}</div>
-                    <div className={`pos-pstock${p.stock <= p.min ? ' low' : ''}`}>
-                      {p.stock === 0 ? 'Out of stock' : `${p.stock} in stock`}
-                    </div>
-                  </div>
-                ))
               )}
             </div>
 
@@ -114,21 +115,15 @@ const Checkout = () => {
 
             {/* Cart header */}
             <div className="cart-header">
-              <h3>
-                <ShoppingCart size={18} style={{ marginRight: 6 }} />
-                Cart&nbsp;
-                <span className="cart-count">{cartQty}</span>
-              </h3>
-              <span style={{ fontSize: '.75rem', color: 'var(--text-muted)', fontFamily: "'DM Mono',monospace" }}>
-                {currentRef}
-              </span>
+              <h3>🛒 Cart <span className="cart-count">{cart.reduce((s, i) => s + i.qty, 0)}</span></h3>
+              <span style={{ fontSize: '.75rem', color: 'var(--text-muted)', fontFamily: "'DM Mono',monospace" }}>{currentRef}</span>
             </div>
 
             {/* Customer name */}
             <div className="cart-customer">
               <input
                 type="text"
-                placeholder="Customer name (optional)"
+                placeholder="👤 Customer name (optional)"
                 value={customer}
                 onChange={e => setCustomer(e.target.value)}
               />
@@ -138,14 +133,13 @@ const Checkout = () => {
             <div className="cart-items">
               {cart.length === 0 ? (
                 <div className="cart-empty">
-                  <div className="cart-empty-icon">
-                    <ShoppingCart size={44} strokeWidth={1.2} style={{ opacity: .35 }} />
-                  </div>
+                  <div className="cart-empty-icon">🛒</div>
                   <p>No items yet.<br />Click a product to add it.</p>
                 </div>
               ) : (
                 cart.map(item => (
                   <div className="cart-item" key={item.id}>
+                    <span style={{ fontSize: '1.3rem' }}>{item.emoji}</span>
                     <div className="cart-item-info">
                       <div className="cart-item-name">{item.name}</div>
                       <div className="cart-item-price">
@@ -179,6 +173,9 @@ const Checkout = () => {
                   <Tag size={13} /> Discount
                 </div>
                 <div className="discount-row">
+                  <input
+                    type="number"
+                    placeholder="Discount (MK)"
                   <input
                     type="number"
                     placeholder="Discount (MK)"
@@ -238,16 +235,10 @@ const Checkout = () => {
             {/* Body */}
             <div className="receipt-body">
               <div className="receipt-meta">
-                <span>
-                  {new Date(receiptData.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                </span>
+                <span>{new Date(receiptData.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
                 <span>{receiptData.ref}</span>
               </div>
-              <div style={{ fontSize: '.82rem', marginBottom: 10 }}>
-                Customer: <strong>{receiptData.customer}</strong>
-              </div>
-
-              {/* Items */}
+              <div style={{ fontSize: '.82rem', marginBottom: '10px' }}>Customer: <strong>{receiptData.customer}</strong></div>
               <div className="receipt-items">
                 {receiptData.items.map((item, idx) => (
                   <React.Fragment key={idx}>
@@ -256,9 +247,7 @@ const Checkout = () => {
                       <span>MK {(item.price * item.qty).toLocaleString()}</span>
                     </div>
                     <div className="receipt-item">
-                      <span style={{ fontSize: '.72rem', color: 'var(--text-muted)' }}>
-                        @ MK {item.price.toLocaleString()} each
-                      </span>
+                      <span style={{ fontSize: '.72rem', color: 'var(--text-muted)' }}>@ MK {i.price.toLocaleString()} each</span>
                     </div>
                   </React.Fragment>
                 ))}
@@ -286,20 +275,8 @@ const Checkout = () => {
 
             {/* Actions */}
             <div className="receipt-actions">
-              <button
-                className="btn btn-outline"
-                style={{ flex: 1, justifyContent: 'center' }}
-                onClick={() => setReceiptData(null)}
-              >
-                Close
-              </button>
-              <button
-                className="btn btn-primary"
-                style={{ flex: 1, justifyContent: 'center' }}
-                onClick={() => window.print()}
-              >
-                <Printer size={16} /> Print
-              </button>
+              <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setReceiptData(null)}>Close</button>
+              <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => alert('Printing...')}>🖨 Print</button>
             </div>
 
           </div>
