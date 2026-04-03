@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 const Topbar = ({ toggleSidebar, activePageTitle, setActivePage }) => {
   const [readOnly, setReadOnly] = useState(true);
@@ -19,12 +19,7 @@ const Topbar = ({ toggleSidebar, activePageTitle, setActivePage }) => {
           onBlur={() => setReadOnly(true)}
         />
       </div>
-      <div className="topbar-actions">
-        <div className="icon-btn" onClick={() => setActivePage('alerts')}>
-          <Bell size={18} />
-          <span className="notif-dot"></span>
-        </div>
-      </div>
+
     </header>
   );
 };
