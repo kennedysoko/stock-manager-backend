@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { usePos } from '../context/PosContext';
-import { Search } from 'lucide-react';
+
 
 const Checkout = () => {
   const { products } = useInventory();
