@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
-import { Search } from 'lucide-react';
 
 const CATEGORIES = ['Beverages', 'Staples', 'Cooking', 'Dairy', 'Bakery', 'Snacks', 'Other'];
 const SUPPLIERS = ['Peoples Trading Co.', 'Metro Wholesale', 'City Distributors', 'Farm Fresh Ltd', 'Other'];
@@ -81,18 +80,14 @@ const Products = () => {
       <div className="toolbar">
         <div className="toolbar-left">
           <div className="search-field">
-frank-funke-kayola
-            <Search size={18} style={{ color: 'var(--text-light)' }} />
-            <input type="text" placeholder="Search by name…" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-
             <span>🔍</span>
             <input
               type="text"
               placeholder="Search by name or ID…"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
+              autoComplete="new-password"
             />
- main
           </div>
         </div>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Add Product</button>
