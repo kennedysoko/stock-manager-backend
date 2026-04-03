@@ -1,5 +1,6 @@
 import React from 'react';
 import { useInventory } from '../context/InventoryContext';
+import { Bell } from 'lucide-react';
 
 const Alerts = () => {
   const { getLowStockProducts } = useInventory();
@@ -8,7 +9,7 @@ const Alerts = () => {
   return (
     <section className="page active" id="page-alerts">
       <div className="page-header">
-        <h1>🔔 Stock Alerts</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Bell size={28} /> Stock Alerts</h1>
         <p>Products that require immediate restocking</p>
       </div>
       <div className="alerts-list">
