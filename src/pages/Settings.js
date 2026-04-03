@@ -53,7 +53,7 @@ const Settings = () => {
           <p>Manage details and access for {selectedUser.name}</p>
         </div>
         
-        <div className="card" style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div className="card" style={{ maxWidth: '600px' }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="card-title">User Details</div>
             <button className="btn btn-outline btn-sm" onClick={() => setSelectedUser(null)}>Back to Settings</button>
