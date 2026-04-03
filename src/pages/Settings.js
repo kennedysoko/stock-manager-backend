@@ -9,6 +9,25 @@ const Settings = () => {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', username: '', role: 'Admin', status: 'Active', email: '', phone: '', password: '', confirmPassword: '' });
 
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({});
+
+  const handleEditChange = (e) => setEditForm({ ...editForm, [e.target.name]: e.target.value });
+
+  const submitEdit = () => {
+    if (!editForm.name.trim() || !editForm.username?.trim()) {
+      alert('Full Name and Username are required.');
+      return;
+    }
+    const initials = editForm.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
+    
+    const updatedUser = { ...editForm, initials };
+    
+    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+    setSelectedUser(updatedUser);
+    setEditModalOpen(false);
+  };
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -84,8 +103,67 @@ const Settings = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button className="btn btn-primary" onClick={() => alert('Edit User modal coming soon!')}>Edit Details</button>
+              <button className="btn btn-primary" onClick={() => {
+                setEditForm({ ...selectedUser });
+                setEditModalOpen(true);
+              }}>Edit Details</button>
               <button className="btn btn-outline" onClick={() => alert('Change Password modal coming soon!')}>Change Password</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Edit User Modal */}
+        <div className={`modal-overlay${isEditModalOpen ? ' open' : ''}`} onClick={e => e.target === e.currentTarget && setEditModalOpen(false)}>
+          <div className="modal" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h2>Edit User</h2>
+              <button className="modal-close" onClick={() => setEditModalOpen(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Full Name *</label>
+                  <input name="name" value={editForm.name || ''} onChange={handleEditChange} />
+                </div>
+                <div className="form-group">
+                  <label>Username *</label>
+                  <input name="username" value={editForm.username || ''} onChange={handleEditChange} />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Role *</label>
+                  <select name="role" value={editForm.role || ''} onChange={handleEditChange}>
+                    <option>Admin</option>
+                    <option>Manager</option>
+                    <option>Cashier</option>
+                    <option>Stock Clerk</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Status</label>
+                  <select name="status" value={editForm.status || ''} onChange={handleEditChange}>
+                    <option>Active</option>
+                    <option>Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" name="email" value={editForm.email || ''} onChange={handleEditChange} />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-outline" onClick={() => setEditModalOpen(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={submitEdit}>Update User</button>
             </div>
           </div>
         </div>
