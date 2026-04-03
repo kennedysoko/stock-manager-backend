@@ -93,7 +93,6 @@ const Checkout = () => {
                     className={`pos-product-card${p.stock === 0 ? ' out-of-stock' : ''}`}
                     onClick={() => addToCart(p.id)}
                   >
-                    <div className="pos-emoji">{p.emoji}</div>
                     <div className="pos-pname">{p.name}</div>
                     <div className="pos-pprice">MK {p.price.toLocaleString()}</div>
                     <div className={`pos-pstock${p.stock <= p.min ? ' low' : ''}`}>
@@ -146,7 +145,6 @@ const Checkout = () => {
               ) : (
                 cart.map(item => (
                   <div className="cart-item" key={item.id}>
-                    <span style={{ fontSize: '1.3rem' }}>{item.emoji}</span>
                     <div className="cart-item-info">
                       <div className="cart-item-name">{item.name}</div>
                       <div className="cart-item-price">
