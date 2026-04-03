@@ -141,7 +141,6 @@ const Checkout = () => {
               ) : (
                 cart.map(item => (
                   <div className="cart-item" key={item.id}>
-                    <span style={{ fontSize: '1.3rem' }}>{item.emoji}</span>
                     <div className="cart-item-info">
                       <div className="cart-item-name">{item.name}</div>
                       <div className="cart-item-price">
