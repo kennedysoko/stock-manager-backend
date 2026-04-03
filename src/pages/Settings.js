@@ -1,6 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Settings = () => {
+  const [users, setUsers] = useState([
+    { id: 1, name: 'Admin Kayola', role: 'Administrator', initials: 'AK', bg: '', status: 'Active' },
+    { id: 2, name: 'Mary Cashier', role: 'Cashier', initials: 'MC', bg: '#3B7DD8', status: 'Active' }
+  ]);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name: '', role: 'Cashier' });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setForm({ name: '', role: 'Cashier' });
+  };
+
+  const handleSubmit = () => {
+    if (!form.name.trim()) return;
+    const initials = form.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
+    const bgColors = ['#E53935', '#D81B60', '#8E24AA', '#5E35B1', '#3949AB', '#1E88E5', '#039BE5', '#00ACC1', '#00897B', '#43A047', '#7CB342', '#F4511E'];
+    const bg = bgColors[Math.floor(Math.random() * bgColors.length)];
+    
+    setUsers([...users, {
+      id: Date.now(),
+      name: form.name.trim(),
+      role: form.role,
+      initials,
+      bg,
+      status: 'Active'
+    }]);
+    handleClose();
+  };
+
   return (
     <section className="page active" id="page-settings">
       <div className="page-header">
@@ -20,17 +53,14 @@ const Settings = () => {
         <div className="card">
           <div className="card-header"><div className="card-title">User Management</div></div>
           <div className="card-body">
-            <div className="alert-item">
-              <div className="user-avatar" style={{width:'32px', height:'32px', fontSize:'.75rem'}}>AK</div>
-              <div className="alert-info"><div className="alert-name">Admin Kayola</div><div className="alert-sub">Administrator</div></div>
-              <span className="badge badge-green">Active</span>
-            </div>
-            <div className="alert-item">
-              <div className="user-avatar" style={{width:'32px', height:'32px', fontSize:'.75rem', background:'#3B7DD8'}}>MC</div>
-              <div className="alert-info"><div className="alert-name">Mary Cashier</div><div className="alert-sub">Cashier</div></div>
-              <span className="badge badge-green">Active</span>
-            </div>
-            <div style={{marginTop:'12px'}}><button className="btn btn-outline" onClick={() => alert('Add User modal logic...')}>+ Add User</button></div>
+            {users.map(user => (
+              <div className="alert-item" key={user.id}>
+                <div className="user-avatar" style={{width:'32px', height:'32px', fontSize:'.75rem', background: user.bg || undefined}}>{user.initials}</div>
+                <div className="alert-info"><div className="alert-name">{user.name}</div><div className="alert-sub">{user.role}</div></div>
+                <span className="badge badge-green">{user.status}</span>
+              </div>
+            ))}
+            <div style={{marginTop:'12px'}}><button className="btn btn-outline" onClick={() => setShowModal(true)}>+ Add User</button></div>
           </div>
         </div>
       </div>
@@ -43,6 +73,40 @@ const Settings = () => {
             <div className="form-group"><label>Low Stock Warning (units)</label><input type="number" defaultValue="15" /></div>
           </div>
           <button className="btn btn-primary" onClick={() => alert('Alert settings saved!')}>Save Thresholds</button>
+        </div>
+      </div>
+
+      {/* Add User Modal */}
+      <div className={`modal-overlay${showModal ? ' open' : ''}`} onClick={e => e.target === e.currentTarget && handleClose()}>
+        <div className="modal" style={{ maxWidth: '400px' }}>
+          <div className="modal-header">
+            <h2>Add New User</h2>
+            <button className="modal-close" onClick={handleClose}>✕</button>
+          </div>
+          <div className="modal-body">
+            <div className="form-group">
+              <label>Full Name</label>
+              <input
+                name="name"
+                placeholder="e.g. John Doe"
+                value={form.name}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Role</label>
+              <select name="role" value={form.role} onChange={handleChange}>
+                <option>Administrator</option>
+                <option>Manager</option>
+                <option>Cashier</option>
+                <option>Stock Clerk</option>
+              </select>
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-outline" onClick={handleClose}>Cancel</button>
+            <button className="btn btn-primary" onClick={handleSubmit}>Add User</button>
+          </div>
         </div>
       </div>
     </section>
