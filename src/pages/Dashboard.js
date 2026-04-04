@@ -55,7 +55,7 @@ const Dashboard = ({ setActivePage }) => {
       <div className="grid-2">
         <div className="card">
           <div className="card-header">
-            <div className="card-title">Stock Movements — This Week</div>
+            <div className="card-title">Stock Movements This Week</div>
             <span className="card-action">View details →</span>
           </div>
           <div className="card-body">
