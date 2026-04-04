@@ -14,12 +14,14 @@ const defaultForm = {
 };
 
 const Products = () => {
-  const { products, addProduct, updateProduct } = useInventory();
+  const { products, addProduct, updateProduct, recordTransaction } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+  const [stockProduct, setStockProduct] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const [editForm, setEditForm] = useState({});
+  const [stockForm, setStockForm] = useState({ type: 'IN', productId: '', qty: '', date: '', notes: '' });
   const [errors, setErrors] = useState({});
 
   const filtered = products.filter(p =>
@@ -95,6 +97,13 @@ const Products = () => {
     setEditProduct(null);
   };
 
+  const handleStockSave = () => {
+    if (!stockForm.productId || !stockForm.qty) return;
+    recordTransaction(stockForm.productId, stockForm.type, stockForm.qty, null, stockForm.notes);
+    setStockProduct(false);
+    setStockForm({ type: 'IN', productId: '', qty: '', date: '', notes: '' });
+  };
+
   return (
     <section className="page active" id="page-products">
       <div className="page-header">
@@ -157,7 +166,7 @@ const Products = () => {
                     <td>{statusBadge}</td>
                     <td>
                       <div className="action-btns">
-                        <button className="btn btn-outline btn-sm">+ Stock</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => setStockProduct(true)}>+ Stock</button>
                         <button className="btn btn-outline btn-sm" onClick={() => openEdit(p)}>Edit</button>
                       </div>
                     </td>
@@ -307,6 +316,62 @@ const Products = () => {
           </div>
         </div>
       </div>
+      {/* Record Stock Transaction Modal */}
+      <div className={`modal-overlay${stockProduct ? ' open' : ''}`} onClick={e => e.target === e.currentTarget && setStockProduct(false)}>
+        <div className="modal">
+          <div className="modal-header">
+            <h2>Record Stock Transaction</h2>
+            <button className="modal-close" onClick={() => setStockProduct(false)}>✕</button>
+          </div>
+          <div className="modal-body">
+            <div className="form-group">
+              <label>Transaction Type</label>
+              <select value={stockForm.type} onChange={e => setStockForm(f => ({ ...f, type: e.target.value }))}>
+                <option value="IN">Stock In (Received goods)</option>
+                <option value="OUT">Stock Out (Removed goods)</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Product</label>
+              <select value={stockForm.productId} onChange={e => setStockForm(f => ({ ...f, productId: e.target.value }))}>
+                <option value="">-- Select a product --</option>
+                {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Quantity</label>
+                <input
+                  type="number" min="1" placeholder="0"
+                  value={stockForm.qty}
+                  onChange={e => setStockForm(f => ({ ...f, qty: e.target.value }))}
+                />
+              </div>
+              <div className="form-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  value={stockForm.date}
+                  onChange={e => setStockForm(f => ({ ...f, date: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Notes (Optional)</label>
+              <textarea
+                placeholder="Reason or notes…"
+                value={stockForm.notes}
+                onChange={e => setStockForm(f => ({ ...f, notes: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-outline" onClick={() => setStockProduct(false)}>Cancel</button>
+            <button className="btn btn-primary" onClick={handleStockSave}>Save Transaction</button>
+          </div>
+        </div>
+      </div>
+
       {/* Edit Product Modal */}
       <div className={`modal-overlay${editProduct ? ' open' : ''}`} onClick={e => e.target === e.currentTarget && setEditProduct(null)}>
         <div className="modal">
