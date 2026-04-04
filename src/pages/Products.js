@@ -14,10 +14,12 @@ const defaultForm = {
 };
 
 const Products = () => {
-  const { products, addProduct } = useInventory();
+  const { products, addProduct, updateProduct } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
   const [form, setForm] = useState(defaultForm);
+  const [editForm, setEditForm] = useState({});
   const [errors, setErrors] = useState({});
 
   const filtered = products.filter(p =>
@@ -69,6 +71,28 @@ const Products = () => {
     setShowModal(false);
     setForm(defaultForm);
     setErrors({});
+  };
+
+  const openEdit = (p) => {
+    setEditProduct(p);
+    setEditForm({ name: p.name, cat: p.cat, price: p.price, min: p.min, supplier: p.supplier || 'Peoples Trading Co.' });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleEditSave = () => {
+    updateProduct(editProduct.id, {
+      name: editForm.name.trim(),
+      cat: editForm.cat,
+      price: Number(editForm.price),
+      min: Number(editForm.min),
+      supplier: editForm.supplier,
+      emoji: EMOJI_MAP[editForm.cat] || '📦',
+    });
+    setEditProduct(null);
   };
 
   return (
@@ -134,7 +158,7 @@ const Products = () => {
                     <td>
                       <div className="action-btns">
                         <button className="btn btn-outline btn-sm">+ Stock</button>
-                        <button className="btn btn-outline btn-sm">Edit</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => openEdit(p)}>Edit</button>
                       </div>
                     </td>
                   </tr>
@@ -280,6 +304,49 @@ const Products = () => {
           <div className="modal-footer">
             <button className="btn btn-outline" onClick={handleClose}>Cancel</button>
             <button className="btn btn-primary" onClick={handleSubmit}>Add Product</button>
+          </div>
+        </div>
+      </div>
+      {/* Edit Product Modal */}
+      <div className={`modal-overlay${editProduct ? ' open' : ''}`} onClick={e => e.target === e.currentTarget && setEditProduct(null)}>
+        <div className="modal">
+          <div className="modal-header">
+            <h2>Edit Product</h2>
+            <button className="modal-close" onClick={() => setEditProduct(null)}>✕</button>
+          </div>
+          <div className="modal-body">
+            <div className="form-row">
+              <div className="form-group">
+                <label>Product Name</label>
+                <input name="name" value={editForm.name || ''} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
+                <label>Category</label>
+                <select name="cat" value={editForm.cat || ''} onChange={handleEditChange}>
+                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Unit Price (MK)</label>
+                <input name="price" type="number" min="0" value={editForm.price || ''} onChange={handleEditChange} />
+              </div>
+              <div className="form-group">
+                <label>Min Stock Level</label>
+                <input name="min" type="number" min="0" value={editForm.min || ''} onChange={handleEditChange} />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Supplier</label>
+              <select name="supplier" value={editForm.supplier || ''} onChange={handleEditChange}>
+                {SUPPLIERS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-outline" onClick={() => setEditProduct(null)}>Cancel</button>
+            <button className="btn btn-primary" onClick={handleEditSave}>Save Changes</button>
           </div>
         </div>
       </div>
