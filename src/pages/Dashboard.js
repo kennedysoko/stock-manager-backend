@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useInventory } from '../context/InventoryContext';
 import { Package, AlertTriangle, ShoppingCart, DollarSign, Bell } from 'lucide-react';
 
-const Dashboard = () => {
+const Dashboard = ({ setActivePage }) => {
   const { user } = useAuth();
   const { products, transactions, getLowStockProducts } = useInventory();
 
@@ -18,7 +18,7 @@ const Dashboard = () => {
       </div>
 
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card" onClick={() => setActivePage('products')} style={{ cursor: 'pointer' }} title="Click to view products">
           <div className="stat-label">Total Products</div>
           <div className="stat-val">{products.length}</div>
           <div className="stat-change up">↑ Active tracking</div>
@@ -26,7 +26,7 @@ const Dashboard = () => {
             <Package size={20} />
           </div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card" onClick={() => setActivePage('alerts')} style={{ cursor: 'pointer' }} title="Click to view alerts">
           <div className="stat-label">Low Stock Items</div>
           <div className="stat-val">{lowStockProducts.length}</div>
           <div className="stat-change down">↓ Needs attention</div>
@@ -34,7 +34,7 @@ const Dashboard = () => {
             <AlertTriangle size={20} />
           </div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card" onClick={() => setActivePage('orders')} style={{ cursor: 'pointer' }} title="Click to view orders">
           <div className="stat-label">Orders Pending</div>
           <div className="stat-val">3</div>
           <div className="stat-change up">↑ 1 new today</div>
@@ -42,7 +42,7 @@ const Dashboard = () => {
             <ShoppingCart size={20} />
           </div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card" onClick={() => setActivePage('stock-value')} style={{ cursor: 'pointer' }} title="Click to view stock value breakdown">
           <div className="stat-label">Total Stock Value</div>
           <div className="stat-val">MK{(totalValue / 1000000).toFixed(1)}M</div>
           <div className="stat-change up">↑ Live metrics</div>
@@ -91,7 +91,7 @@ const Dashboard = () => {
               <Bell size={18} />
               Low Stock Alerts
             </div>
-            <span className="card-action">View all →</span>
+            <span className="card-action" onClick={() => setActivePage('alerts')} style={{ cursor: 'pointer' }}>View all →</span>
           </div>
           <div className="card-body" style={{ padding: '12px 16px', maxHeight: '250px', overflowY: 'auto' }}>
             {lowStockProducts.length === 0 ? (
