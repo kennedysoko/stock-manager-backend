@@ -15,6 +15,8 @@ import Alerts from './pages/Alerts';
 import Forecasting from './pages/Forecasting';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import StockValue from './pages/StockValue';
+import InventoryReport from './pages/InventoryReport';
 
 const MainApp = () => {
   const { user } = useAuth();
@@ -26,7 +28,7 @@ const MainApp = () => {
 
   const renderPage = () => {
     switch (activePage) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard setActivePage={setActivePage} />;
       case 'products': return <Products />;
       case 'inventory': return <Inventory />;
       case 'checkout': return <Checkout />;
@@ -34,8 +36,10 @@ const MainApp = () => {
       case 'deliveries': return <Deliveries />;
       case 'alerts': return <Alerts />;
       case 'forecasting': return <Forecasting />;
-      case 'reports': return <Reports />;
+      case 'reports': return <Reports setActivePage={setActivePage} />;
       case 'settings': return <Settings />;
+      case 'stock-value': return <StockValue />;
+      case 'inventory-report': return <InventoryReport />;
       default: return null;
     }
   };
