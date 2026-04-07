@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Product {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  category      String
+  price         Float
+  stock         Int
+  minStockLevel Int
+  supplier      String?
+  emoji         String
+  image         String?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  transactions  Transaction[]
+  saleItems     SaleItem[]
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  type        String   // "IN" or "OUT"
+  qty         Int
+  stockBefore Int
+  stockAfter  Int
+  date        DateTime @default(now())
+  user        String
+  notes       String?
+}
+
+model Sale {
+  id           String     @id @default(uuid())
+  customerName String     @default("Walk-in Customer")
+  subtotal     Float
+  discount     Float
+  total        Float
+  date         DateTime   @default(now())
+  user         String
+  items        SaleItem[]
+}
+
+model SaleItem {
+  id        String  @id @default(uuid())
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  qty       Int
+  price     Float
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  username  String   @unique
+  email     String?
+  phone     String?
+  role      String   @default("Cashier") // Admin, Manager, Cashier, Stock Clerk
+  initials  String
+  bg        String?
+  status    String   @default("Active") // Active, Inactive
+  password  String   // plain text for simplicity in this local app
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
