@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import {
-  Search, ShoppingCart, User, Minus, Plus, X,
-  CreditCard, Trash2, Printer, Receipt, Tag,
+  Search, ShoppingCart, Minus, Plus, X,
+  CreditCard, Trash2, Printer, Receipt, Tag, Smartphone, Banknote, MoreHorizontal,
 } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { usePos } from '../context/PosContext';
+
+/* ── Payment methods available in Malawi ── */
+const PAYMENT_METHODS = [
+  { id: 'cash',        label: 'Cash',         icon: Banknote,     color: '#2D8A5E' },
+  { id: 'airtel',     label: 'Airtel Money',  icon: Smartphone,   color: '#E05C3A' },
+  { id: 'mpamba',     label: 'TNM Mpamba',    icon: Smartphone,   color: '#3B7DD8' },
+  { id: 'other',      label: 'Other',         icon: MoreHorizontal, color: '#7A7269' },
+];
 
 
 const Checkout = () => {
@@ -18,6 +26,7 @@ const Checkout = () => {
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('All');
   const [receiptData, setReceiptData] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('cash');
 
   const categories = ['All', 'Beverages', 'Staples', 'Dairy', 'Cooking', 'Bakery', 'Snacks'];
 
@@ -32,8 +41,12 @@ const Checkout = () => {
 
   /* ── complete sale ── */
   const handleCheckout = () => {
-    const data = processCheckout();
-    if (data) setReceiptData(data);
+    const selectedMethod = PAYMENT_METHODS.find(m => m.id === paymentMethod);
+    const data = processCheckout({ paymentMethod: selectedMethod?.label || 'Cash' });
+    if (data) {
+      setReceiptData(data);
+      setPaymentMethod('cash'); // reset after sale
+    }
   };
 
   return (
@@ -199,6 +212,32 @@ const Checkout = () => {
                   <span>TOTAL</span>
                   <span>MK {total.toLocaleString()}</span>
                 </div>
+
+                {/* ── Payment Method ── */}
+                <div className="payment-method-section">
+                  <div className="payment-method-label">
+                    <CreditCard size={13} /> Payment Method
+                  </div>
+                  <div className="payment-method-grid">
+                    {PAYMENT_METHODS.map(method => {
+                      const Icon = method.icon;
+                      const isActive = paymentMethod === method.id;
+                      return (
+                        <button
+                          key={method.id}
+                          id={`pay-${method.id}`}
+                          className={`pay-method-btn${isActive ? ' active' : ''}`}
+                          style={isActive ? { '--pay-color': method.color } : {}}
+                          onClick={() => setPaymentMethod(method.id)}
+                          title={method.label}
+                        >
+                          <Icon size={15} />
+                          <span>{method.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -243,8 +282,11 @@ const Checkout = () => {
                 </span>
                 <span>{receiptData.ref}</span>
               </div>
-              <div style={{ fontSize: '.82rem', marginBottom: 10 }}>
+              <div style={{ fontSize: '.82rem', marginBottom: 6 }}>
                 Customer: <strong>{receiptData.customer}</strong>
+              </div>
+              <div style={{ fontSize: '.82rem', marginBottom: 10 }}>
+                Payment: <strong>{receiptData.paymentMethod}</strong>
               </div>
 
               {/* Items */}
