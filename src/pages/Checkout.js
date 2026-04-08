@@ -27,6 +27,7 @@ const Checkout = () => {
   const [activeCat, setActiveCat] = useState('All');
   const [receiptData, setReceiptData] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [amountTendered, setAmountTendered] = useState('');
 
   const categories = ['All', 'Beverages', 'Staples', 'Dairy', 'Cooking', 'Bakery', 'Snacks'];
 
@@ -52,6 +53,7 @@ const Checkout = () => {
   const closeReceipt = () => {
     setReceiptData(null);
     setPaymentMethod('cash'); // Reset payment method for next sale
+    setAmountTendered(''); // Reset amount tendered
   };
 
   return (
@@ -324,6 +326,38 @@ const Checkout = () => {
                   <span>TOTAL PAID</span>
                   <span>MK {receiptData.total.toLocaleString()}</span>
                 </div>
+                
+                {/* ── Cash Amount Tendered & Change ── */}
+                {paymentMethod === 'cash' && (
+                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+                    <div className="r-row" style={{ alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Amount Tendered</span>
+                      <input 
+                        type="number" 
+                        min="0"
+                        value={amountTendered}
+                        onChange={(e) => setAmountTendered(e.target.value)}
+                        placeholder="MK"
+                        style={{
+                          width: '110px',
+                          textAlign: 'right',
+                          padding: '6px 8px',
+                          border: '1.5px solid var(--border)',
+                          borderRadius: 'var(--radius-sm)',
+                          fontFamily: "'DM Mono', monospace",
+                          fontSize: '.85rem',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                    {Number(amountTendered) > receiptData.total && (
+                      <div className="r-row" style={{ color: 'var(--success)', fontWeight: 800, fontSize: '.95rem' }}>
+                        <span>Change Due</span>
+                        <span>MK {(Number(amountTendered) - receiptData.total).toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
