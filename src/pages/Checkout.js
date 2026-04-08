@@ -45,8 +45,13 @@ const Checkout = () => {
     const data = processCheckout({ paymentMethod: selectedMethod?.label || 'Cash' });
     if (data) {
       setReceiptData(data);
-      setPaymentMethod('cash'); // reset after sale
+      // We don't reset paymentMethod here so the modal can show the active one
     }
+  };
+
+  const closeReceipt = () => {
+    setReceiptData(null);
+    setPaymentMethod('cash'); // Reset payment method for next sale
   };
 
   return (
@@ -212,32 +217,6 @@ const Checkout = () => {
                   <span>TOTAL</span>
                   <span>MK {total.toLocaleString()}</span>
                 </div>
-
-                {/* ── Payment Method ── */}
-                <div className="payment-method-section">
-                  <div className="payment-method-label">
-                    <CreditCard size={13} /> Payment Method
-                  </div>
-                  <div className="payment-method-grid">
-                    {PAYMENT_METHODS.map(method => {
-                      const Icon = method.icon;
-                      const isActive = paymentMethod === method.id;
-                      return (
-                        <button
-                          key={method.id}
-                          id={`pay-${method.id}`}
-                          className={`pay-method-btn${isActive ? ' active' : ''}`}
-                          style={isActive ? { '--pay-color': method.color } : {}}
-                          onClick={() => setPaymentMethod(method.id)}
-                          title={method.label}
-                        >
-                          <Icon size={15} />
-                          <span>{method.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
             )}
 
@@ -282,11 +261,36 @@ const Checkout = () => {
                 </span>
                 <span>{receiptData.ref}</span>
               </div>
-              <div style={{ fontSize: '.82rem', marginBottom: 6 }}>
+              <div style={{ fontSize: '.82rem', marginBottom: 16 }}>
                 Customer: <strong>{receiptData.customer}</strong>
               </div>
-              <div style={{ fontSize: '.82rem', marginBottom: 10 }}>
-                Payment: <strong>{receiptData.paymentMethod}</strong>
+              
+              {/* ── Payment Method Selector in Modal ── */}
+              <div className="payment-method-section receipt-payment" style={{ borderTop: 'none', marginTop: 0, paddingTop: 0, marginBottom: 20 }}>
+                <div className="payment-method-label" style={{ justifyContent: 'center' }}>
+                  <CreditCard size={13} /> Select Payment Method
+                </div>
+                <div className="payment-method-grid">
+                  {PAYMENT_METHODS.map(method => {
+                    const Icon = method.icon;
+                    const isActive = paymentMethod === method.id;
+                    return (
+                      <button
+                        key={'modal-pay-' + method.id}
+                        className={`pay-method-btn${isActive ? ' active' : ''}`}
+                        style={isActive ? { '--pay-color': method.color } : {}}
+                        onClick={() => {
+                          setPaymentMethod(method.id);
+                          setReceiptData({ ...receiptData, paymentMethod: method.label });
+                        }}
+                        title={method.label}
+                      >
+                        <Icon size={15} />
+                        <span>{method.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Items */}
@@ -331,7 +335,7 @@ const Checkout = () => {
               <button
                 className="btn btn-outline"
                 style={{ flex: 1, justifyContent: 'center' }}
-                onClick={() => setReceiptData(null)}
+                onClick={closeReceipt}
               >
                 Close
               </button>
