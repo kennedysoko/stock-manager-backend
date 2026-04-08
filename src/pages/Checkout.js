@@ -27,7 +27,7 @@ const Checkout = () => {
   const [activeCat, setActiveCat] = useState('All');
   const [receiptData, setReceiptData] = useState(null);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [paymentMethod, setPaymentMethod] = useState(null);
   const [amountTendered, setAmountTendered] = useState('');
 
   const categories = ['All', 'Beverages', 'Staples', 'Dairy', 'Cooking', 'Bakery', 'Snacks'];
@@ -57,13 +57,13 @@ const Checkout = () => {
 
   const handleCancelSale = () => {
     setIsConfirming(false);
-    setPaymentMethod('cash');
+    setPaymentMethod(null);
     setAmountTendered('');
   };
 
   const closeReceipt = () => {
     setReceiptData(null);
-    setPaymentMethod('cash'); // Reset payment method for next sale
+    setPaymentMethod(null); // Reset payment method for next sale
     setAmountTendered(''); // Reset amount tendered
   };
 
@@ -269,6 +269,11 @@ const Checkout = () => {
           total
         };
 
+        const canConfirm = paymentMethod && (
+          paymentMethod !== 'cash' || 
+          (amountTendered !== '' && Number(amountTendered) >= modalData.total)
+        );
+
         return (
           <div className="modal-overlay open">
           <div className="receipt">
@@ -398,13 +403,15 @@ const Checkout = () => {
                   >
                     Cancel
                   </button>
-                  <button
-                    className="btn btn-primary"
-                    style={{ flex: 1, justifyContent: 'center' }}
-                    onClick={handleConfirmSale}
-                  >
-                    <CreditCard size={16} /> Confirm Sale
-                  </button>
+                  {canConfirm && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ flex: 1, justifyContent: 'center', animation: 'fadeIn .2s ease' }}
+                      onClick={handleConfirmSale}
+                    >
+                      <CreditCard size={16} /> Confirm Sale
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
