@@ -319,6 +319,34 @@ const Checkout = () => {
                       );
                     })}
                   </div>
+
+                  {/* ── Beautiful Amount Tendered Dropdown ── */}
+                  {paymentMethod === 'cash' && (
+                    <div className="tender-section">
+                      <div className="tender-row">
+                        <label>
+                          <Banknote size={15} style={{ color: 'var(--success)' }} />
+                          Amount Tendered
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={amountTendered}
+                          onChange={(e) => setAmountTendered(e.target.value)}
+                          placeholder="MK 0"
+                          className="tender-input"
+                        />
+                      </div>
+                      
+                      {Number(amountTendered) > modalData.total && (
+                        <div className="tender-change-row">
+                          <span>Change Due</span>
+                          <span>MK {(Number(amountTendered) - modalData.total).toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                 </div>
               )}
 
@@ -353,38 +381,6 @@ const Checkout = () => {
                   <span>TOTAL PAID</span>
                   <span>MK {modalData.total.toLocaleString()}</span>
                 </div>
-                
-                {/* ── Cash Amount Tendered & Change ── */}
-                {paymentMethod === 'cash' && (
-                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
-                    <div className="r-row" style={{ alignItems: 'center', marginBottom: 6 }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Amount Tendered</span>
-                      <input 
-                        type="number" 
-                        min="0"
-                        value={amountTendered}
-                        onChange={(e) => setAmountTendered(e.target.value)}
-                        placeholder="MK"
-                        style={{
-                          width: '110px',
-                          textAlign: 'right',
-                          padding: '6px 8px',
-                          border: '1.5px solid var(--border)',
-                          borderRadius: 'var(--radius-sm)',
-                          fontFamily: "'DM Mono', monospace",
-                          fontSize: '.85rem',
-                          outline: 'none'
-                        }}
-                      />
-                    </div>
-                    {Number(amountTendered) > modalData.total && (
-                      <div className="r-row" style={{ color: 'var(--success)', fontWeight: 800, fontSize: '.95rem' }}>
-                        <span>Change Due</span>
-                        <span>MK {(Number(amountTendered) - modalData.total).toLocaleString()}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
 
