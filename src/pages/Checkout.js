@@ -26,6 +26,7 @@ const Checkout = () => {
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('All');
   const [receiptData, setReceiptData] = useState(null);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountTendered, setAmountTendered] = useState('');
 
@@ -41,13 +42,23 @@ const Checkout = () => {
   const cartQty = cart.reduce((s, i) => s + i.qty, 0);
 
   /* ── complete sale ── */
-  const handleCheckout = () => {
+  const handleInitiateSideCheckout = () => {
+    setIsConfirming(true);
+  };
+
+  const handleConfirmSale = () => {
     const selectedMethod = PAYMENT_METHODS.find(m => m.id === paymentMethod);
     const data = processCheckout({ paymentMethod: selectedMethod?.label || 'Cash' });
     if (data) {
       setReceiptData(data);
-      // We don't reset paymentMethod here so the modal can show the active one
+      setIsConfirming(false);
     }
+  };
+
+  const handleCancelSale = () => {
+    setIsConfirming(false);
+    setPaymentMethod('cash');
+    setAmountTendered('');
   };
 
   const closeReceipt = () => {
@@ -227,7 +238,7 @@ const Checkout = () => {
               <button
                 className="btn btn-checkout"
                 disabled={cart.length === 0}
-                onClick={handleCheckout}
+                onClick={handleInitiateSideCheckout}
               >
                 <CreditCard size={18} /> Complete Sale
               </button>
@@ -243,10 +254,23 @@ const Checkout = () => {
 
 
       {/* ══════════════════════════════════════════
-          RECEIPT MODAL
+          RECEIPT / CONFIRMATION MODAL
       ══════════════════════════════════════════ */}
-      {receiptData && (
-        <div className="modal-overlay open">
+      {(isConfirming || receiptData) && (() => {
+        const isReceipt = !!receiptData;
+        const modalData = isReceipt ? receiptData : {
+          ref: currentRef,
+          date: new Date().toISOString(),
+          customer: customer.trim() || 'Walk-in Customer',
+          paymentMethod: PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label || 'Cash',
+          items: cart,
+          subtotal,
+          discount: validDiscount,
+          total
+        };
+
+        return (
+          <div className="modal-overlay open">
           <div className="receipt">
 
             {/* Header */}
@@ -259,45 +283,48 @@ const Checkout = () => {
             <div className="receipt-body">
               <div className="receipt-meta">
                 <span>
-                  {new Date(receiptData.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                  {new Date(modalData.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                 </span>
-                <span>{receiptData.ref}</span>
+                <span>{modalData.ref}</span>
               </div>
               <div style={{ fontSize: '.82rem', marginBottom: 16 }}>
-                Customer: <strong>{receiptData.customer}</strong>
+                Customer: <strong>{modalData.customer}</strong>
               </div>
               
               {/* ── Payment Method Selector in Modal ── */}
-              <div className="payment-method-section receipt-payment" style={{ borderTop: 'none', marginTop: 0, paddingTop: 0, marginBottom: 20 }}>
-                <div className="payment-method-label" style={{ justifyContent: 'center' }}>
-                  <CreditCard size={13} /> Select Payment Method
+              {isReceipt ? (
+                <div style={{ fontSize: '.82rem', marginBottom: 10 }}>
+                  Payment: <strong>{modalData.paymentMethod}</strong>
                 </div>
-                <div className="payment-method-grid">
-                  {PAYMENT_METHODS.map(method => {
-                    const Icon = method.icon;
-                    const isActive = paymentMethod === method.id;
-                    return (
-                      <button
-                        key={'modal-pay-' + method.id}
-                        className={`pay-method-btn${isActive ? ' active' : ''}`}
-                        style={isActive ? { '--pay-color': method.color } : {}}
-                        onClick={() => {
-                          setPaymentMethod(method.id);
-                          setReceiptData({ ...receiptData, paymentMethod: method.label });
-                        }}
-                        title={method.label}
-                      >
-                        <Icon size={15} />
-                        <span>{method.label}</span>
-                      </button>
-                    );
-                  })}
+              ) : (
+                <div className="payment-method-section receipt-payment" style={{ borderTop: 'none', marginTop: 0, paddingTop: 0, marginBottom: 20 }}>
+                  <div className="payment-method-label" style={{ justifyContent: 'center' }}>
+                    <CreditCard size={13} /> Select Payment Method
+                  </div>
+                  <div className="payment-method-grid">
+                    {PAYMENT_METHODS.map(method => {
+                      const Icon = method.icon;
+                      const isActive = paymentMethod === method.id;
+                      return (
+                        <button
+                          key={'modal-pay-' + method.id}
+                          className={`pay-method-btn${isActive ? ' active' : ''}`}
+                          style={isActive ? { '--pay-color': method.color } : {}}
+                          onClick={() => setPaymentMethod(method.id)}
+                          title={method.label}
+                        >
+                          <Icon size={15} />
+                          <span>{method.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Items */}
               <div className="receipt-items">
-                {receiptData.items.map((item, idx) => (
+                {modalData.items.map((item, idx) => (
                   <React.Fragment key={idx}>
                     <div className="receipt-item">
                       <span>{item.name} &times; {item.qty}</span>
@@ -316,15 +343,15 @@ const Checkout = () => {
               <div className="receipt-totals">
                 <div className="r-row">
                   <span>Subtotal</span>
-                  <span>MK {receiptData.subtotal.toLocaleString()}</span>
+                  <span>MK {modalData.subtotal.toLocaleString()}</span>
                 </div>
                 <div className="r-row">
                   <span>Discount</span>
-                  <span>MK {receiptData.discount.toLocaleString()}</span>
+                  <span>MK {modalData.discount.toLocaleString()}</span>
                 </div>
                 <div className="r-row r-total">
                   <span>TOTAL PAID</span>
-                  <span>MK {receiptData.total.toLocaleString()}</span>
+                  <span>MK {modalData.total.toLocaleString()}</span>
                 </div>
                 
                 {/* ── Cash Amount Tendered & Change ── */}
@@ -350,10 +377,10 @@ const Checkout = () => {
                         }}
                       />
                     </div>
-                    {Number(amountTendered) > receiptData.total && (
+                    {Number(amountTendered) > modalData.total && (
                       <div className="r-row" style={{ color: 'var(--success)', fontWeight: 800, fontSize: '.95rem' }}>
                         <span>Change Due</span>
-                        <span>MK {(Number(amountTendered) - receiptData.total).toLocaleString()}</span>
+                        <span>MK {(Number(amountTendered) - modalData.total).toLocaleString()}</span>
                       </div>
                     )}
                   </div>
@@ -362,29 +389,50 @@ const Checkout = () => {
             </div>
 
             {/* Footer */}
-            <div className="receipt-footer">Thank you for shopping with us!</div>
+            {isReceipt && <div className="receipt-footer">Thank you for shopping with us!</div>}
 
             {/* Actions */}
             <div className="receipt-actions">
-              <button
-                className="btn btn-outline"
-                style={{ flex: 1, justifyContent: 'center' }}
-                onClick={closeReceipt}
-              >
-                Close
-              </button>
-              <button
-                className="btn btn-primary"
-                style={{ flex: 1, justifyContent: 'center' }}
-                onClick={() => window.print()}
-              >
-                <Printer size={16} /> Print
-              </button>
+              {isConfirming ? (
+                <>
+                  <button
+                    className="btn btn-outline"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={handleCancelSale}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={handleConfirmSale}
+                  >
+                    <CreditCard size={16} /> Confirm Sale
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="btn btn-outline"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={closeReceipt}
+                  >
+                    Close
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    onClick={() => window.print()}
+                  >
+                    <Printer size={16} /> Print
+                  </button>
+                </>
+              )}
             </div>
 
           </div>
         </div>
-      )}
+      );})() /* IIFE closure for conditional variables */}
     </>
   );
 };
