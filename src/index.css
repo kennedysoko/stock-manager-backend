@@ -164,8 +164,7 @@ body {
 }
 .topbar-title { font-size: 1.05rem; font-weight: 700; flex: 1; }
 .search-wrap {
-  display: flex;
-  align-items: center;
+  display: flex; align-items: center;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -180,6 +179,33 @@ body {
   width: 100%;
 }
 .search-icon { color: var(--text-light); font-size: .9rem; }
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.topbar-clock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-family: inherit;
+}
+.time-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+.time-bold {
+  color: var(--text);
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+}
 .topbar-actions { display: flex; gap: 8px; align-items: center; }
 .icon-btn {
   width: 36px; height: 36px;
