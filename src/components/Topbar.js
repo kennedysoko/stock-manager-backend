@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Calendar, Clock, Settings, HelpCircle, Search } from 'lucide-react';
+import { Bell, Calendar, Clock, HelpCircle } from 'lucide-react';
 
 const Topbar = ({ toggleSidebar, activePageTitle, activePage, setActivePage }) => {
   const [time, setTime] = useState(new Date());
-  const [readOnly, setReadOnly] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -41,16 +40,11 @@ const Topbar = ({ toggleSidebar, activePageTitle, activePage, setActivePage }) =
           </div>
         </div>
       ) : (
-        <div className="search-wrap">
-          <span className="search-icon"><Search size={16} /></span>
-          <input
-            type="text"
-            placeholder="Search products, orders…"
-            autoComplete="new-password"
-            readOnly={readOnly}
-            onFocus={() => setReadOnly(false)}
-            onBlur={() => setReadOnly(true)}
-          />
+        <div className="topbar-actions">
+          <div className="icon-btn" onClick={() => setActivePage('alerts')}>
+            <Bell size={18} />
+            <span className="notif-dot"></span>
+          </div>
         </div>
       )}
     </header>
