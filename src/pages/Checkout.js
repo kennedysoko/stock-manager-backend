@@ -18,11 +18,10 @@ const PAYMENT_METHODS = [
 const Checkout = () => {
   const { products } = useInventory();
   const {
-    const {
-      cart, addToCart, changeQty, removeFromCart, clearCart,
-      discount, setDiscount, customer, setCustomer,
-      getTotals, processCheckout, currentRef
-    } = usePos();
+    cart, addToCart, changeQty, removeFromCart, clearCart,
+    discount, setDiscount, customer, setCustomer,
+    getTotals, processCheckout, currentRef
+  } = usePos();
 
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('All');
@@ -34,7 +33,7 @@ const Checkout = () => {
   const categories = ['All', 'Beverages', 'Staples', 'Dairy', 'Cooking', 'Bakery', 'Snacks'];
 
   const filteredProducts = products.filter(p =>
-    (currentCat === 'All' || p.cat === currentCat) &&
+    (activeCat === 'All' || p.cat === activeCat) &&
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -92,9 +91,6 @@ const Checkout = () => {
               <input
                 type="text"
                 placeholder="Search product by name…"
-              <input
-                type="text"
-                placeholder="Search product by name…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -105,8 +101,8 @@ const Checkout = () => {
               {categories.map(cat => (
                 <button
                   key={cat}
-                  className={`cat-pill ${currentCat === cat ? 'active' : ''}`}
-                  onClick={() => setCurrentCat(cat)}
+                  className={`cat-pill ${activeCat === cat ? 'active' : ''}`}
+                  onClick={() => setActiveCat(cat)}
                 >
                   {cat}
                 </button>
@@ -208,9 +204,6 @@ const Checkout = () => {
                   <input
                     type="number"
                     placeholder="Discount (MK)"
-                  <input
-                    type="number"
-                    placeholder="Discount (MK)"
                     min="0"
                     value={discount || ''}
                     onChange={e => setDiscount(e.target.value)}
@@ -297,7 +290,7 @@ const Checkout = () => {
                         <span>MK {(item.price * item.qty).toLocaleString()}</span>
                       </div>
                       <div className="receipt-item">
-                        <span style={{ fontSize: '.72rem', color: 'var(--text-muted)' }}>@ MK {i.price.toLocaleString()} each</span>
+                        <span style={{ fontSize: '.72rem', color: 'var(--text-muted)' }}>@ MK {item.price.toLocaleString()} each</span>
                       </div>
                     </React.Fragment>
                   ))}
