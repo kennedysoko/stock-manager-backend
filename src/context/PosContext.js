@@ -65,7 +65,7 @@ export const PosProvider = ({ children }) => {
     return { subtotal, discount: validDiscount, total: subtotal - validDiscount };
   };
 
-  const processCheckout = () => {
+  const processCheckout = ({ paymentMethod = 'Cash' } = {}) => {
     if (cart.length === 0) return null;
     
     const totals = getTotals();
@@ -81,6 +81,7 @@ export const PosProvider = ({ children }) => {
       ref: currentRef,
       date: new Date().toISOString(),
       customer: customerName,
+      paymentMethod,
       items: [...cart],
       ...totals
     };

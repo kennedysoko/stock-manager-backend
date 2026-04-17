@@ -55,15 +55,25 @@ const Products = () => {
   const handleSubmit = () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    addProduct({
-      name: form.name.trim(),
-      cat: form.cat,
-      price: Number(form.price),
-      stock: Number(form.stock),
-      min: Number(form.min),
-      emoji: EMOJI_MAP[form.cat] || '📦',
-      image: form.image || null,
-    });
+
+    const existing = products.find(p => p.name.trim().toLowerCase() === form.name.trim().toLowerCase());
+
+    if (existing) {
+      updateProduct(existing.id, {
+        stock: existing.stock + Number(form.stock),
+      });
+    } else {
+      addProduct({
+        name: form.name.trim(),
+        cat: form.cat,
+        price: Number(form.price),
+        stock: Number(form.stock),
+        min: Number(form.min),
+        emoji: EMOJI_MAP[form.cat] || '📦',
+        image: form.image || null,
+      });
+    }
+
     setShowModal(false);
     setForm(defaultForm);
     setErrors({});

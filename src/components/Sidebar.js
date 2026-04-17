@@ -22,7 +22,7 @@ const Sidebar = ({ activePage, setActivePage, isSidebarOpen, setSidebarOpen }) =
       <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)}></div>
       <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`} id="sidebar">
         <div className="sidebar-logo">
-          <div className="logo-name">Stock<span>Smart</span></div>
+          <div className="logo-name">Stock<span>Manager</span></div>
           <div className="logo-tag">Inventory System</div>
         </div>
         <nav className="nav-group">

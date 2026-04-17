@@ -25,6 +25,7 @@ const Layout = ({ children, activePage, setActivePage }) => {
         <Topbar 
           toggleSidebar={toggleSidebar} 
           activePageTitle={pageTitles[activePage] || activePage} 
+          activePage={activePage}
           setActivePage={setActivePage}
         />
         <main className="content">
