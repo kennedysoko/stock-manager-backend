@@ -1,31 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 
 const Settings = () => {
   const [selectedUser, setSelectedUser] = useState(null);
-  const [users, setUsers] = useState([
-    { id: 1, name: 'Admin Kayola', role: 'Administrator', initials: 'AK', bg: '', status: 'Active' },
-    { id: 2, name: 'Mary Cashier', role: 'Cashier', initials: 'MC', bg: '#3B7DD8', status: 'Active' }
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', username: '', role: 'Admin', status: 'Active', email: '', phone: '', password: '', confirmPassword: '' });
 
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({});
 
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await api.get('/settings/users');
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const handleEditChange = (e) => setEditForm({ ...editForm, [e.target.name]: e.target.value });
 
-  const submitEdit = () => {
+  const submitEdit = async () => {
     if (!editForm.name.trim() || !editForm.username?.trim()) {
       alert('Full Name and Username are required.');
       return;
     }
-    const initials = editForm.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
     
-    const updatedUser = { ...editForm, initials };
-    
-    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
-    setSelectedUser(updatedUser);
-    setEditModalOpen(false);
+    try {
+      const updatedUser = await api.put(`/settings/users/${editForm.id}`, editForm);
+      setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+      setSelectedUser(updatedUser);
+      setEditModalOpen(false);
+    } catch (error) {
+      alert('Update failed: ' + error.message);
+    }
   };
 
   const handleChange = (e) => {
@@ -37,7 +54,7 @@ const Settings = () => {
     setForm({ name: '', username: '', role: 'Admin', status: 'Active', email: '', phone: '', password: '', confirmPassword: '' });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.name.trim() || !form.username.trim() || !form.password) {
       alert('Please fill out all required fields.');
       return;
@@ -46,23 +63,26 @@ const Settings = () => {
       alert('Passwords do not match');
       return;
     }
-    const initials = form.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
-    const bgColors = ['#E53935', '#D81B60', '#8E24AA', '#5E35B1', '#3949AB', '#1E88E5', '#039BE5', '#00ACC1', '#00897B', '#43A047', '#7CB342', '#F4511E'];
-    const bg = bgColors[Math.floor(Math.random() * bgColors.length)];
-
-    setUsers([...users, {
-      id: Date.now(),
-      name: form.name.trim(),
-      username: form.username.trim(),
-      email: form.email,
-      phone: form.phone,
-      role: form.role,
-      initials,
-      bg,
-      status: form.status
-    }]);
-    handleClose();
+    
+    try {
+      const newUser = await api.post('/settings/users', {
+        name: form.name.trim(),
+        username: form.username.trim(),
+        email: form.email,
+        phone: form.phone,
+        role: form.role,
+        password: form.password,
+        status: form.status
+      });
+      
+      setUsers([...users, newUser]);
+      handleClose();
+    } catch (error) {
+      alert('Failed to create user: ' + error.message);
+    }
   };
+
+  if (loading) return <section className="page active"><div className="loader">Loading users...</div></section>;
 
   if (selectedUser) {
     return (
@@ -79,10 +99,10 @@ const Settings = () => {
           </div>
           <div className="card-body">
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-              <div className="user-avatar" style={{width:'64px', height:'64px', fontSize:'1.5rem', background: selectedUser.bg || undefined}}>{selectedUser.initials}</div>
+              <div className="user-avatar" style={{width:'64px', height:'64px', fontSize:'1.5rem', background: selectedUser.bg || '#3B7DD8'}}>{selectedUser.initials}</div>
               <div>
                 <h2 style={{ margin: 0 }}>{selectedUser.name}</h2>
-                <div style={{ color: 'var(--text-muted)' }}>@{selectedUser.username || selectedUser.name.toLowerCase().replace(' ', '')}</div>
+                <div style={{ color: 'var(--text-muted)' }}>@{selectedUser.username}</div>
                 <span className={`badge badge-${selectedUser.status === 'Active' ? 'green' : 'red'}`} style={{ marginTop: '8px', display: 'inline-block' }}>{selectedUser.status || 'Active'}</span>
               </div>
             </div>
@@ -107,7 +127,7 @@ const Settings = () => {
                 setEditForm({ ...selectedUser });
                 setEditModalOpen(true);
               }}>Edit Details</button>
-              <button className="btn btn-outline" onClick={() => alert('Change Password modal coming soon!')}>Change Password</button>
+              <button className="btn btn-outline" onClick={() => alert('Change Password coming soon')}>Change Password</button>
             </div>
           </div>
         </div>
@@ -175,7 +195,7 @@ const Settings = () => {
     <section className="page active" id="page-settings">
       <div className="page-header">
         <h1>Settings</h1>
-        <p>Configure your inventory system</p>
+        <p>Manage your real-time system configuration</p>
       </div>
       <div className="grid-2">
         <div className="card">
@@ -183,33 +203,21 @@ const Settings = () => {
           <div className="card-body">
             <div className="form-group"><label>Business Name</label><input type="text" defaultValue="Kayola General Store" /></div>
             <div className="form-group"><label>Location</label><input type="text" defaultValue="Lilongwe, Malawi" /></div>
-            <div className="form-group"><label>Currency</label><select defaultValue="MK — Malawian Kwacha"><option>MK — Malawian Kwacha</option><option>USD — US Dollar</option></select></div>
-            <button className="btn btn-primary" onClick={() => alert('Profile saved!')}>Save Changes</button>
+            <button className="btn btn-primary" onClick={() => alert('Profile saved locally!')}>Save Changes</button>
           </div>
         </div>
         <div className="card">
           <div className="card-header"><div className="card-title">User Management</div></div>
           <div className="card-body">
             {users.map(user => (
-              <div className="alert-item" key={user.id} onClick={() => setSelectedUser(user)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <div className="user-avatar" style={{ width: '32px', height: '32px', fontSize: '.75rem', background: user.bg || undefined }}>{user.initials}</div>
+              <div className="alert-item" key={user.id} onClick={() => setSelectedUser(user)} style={{ cursor: 'pointer' }}>
+                <div className="user-avatar" style={{ width: '32px', height: '32px', fontSize: '.75rem', background: user.bg || '#3B7DD8' }}>{user.initials}</div>
                 <div className="alert-info"><div className="alert-name">{user.name}</div><div className="alert-sub">{user.role}</div></div>
-                <span className="badge badge-green">{user.status}</span>
+                <span className={`badge badge-${user.status === 'Active' ? 'green' : 'red'}`}>{user.status}</span>
               </div>
             ))}
             <div style={{ marginTop: '12px' }}><button className="btn btn-outline" onClick={() => setShowModal(true)}>+ Add User</button></div>
           </div>
-        </div>
-      </div>
-      <div className="card" style={{ marginTop: '16px' }}>
-        <div className="card-header"><div className="card-title">Alert Thresholds</div></div>
-        <div className="card-body">
-          <p style={{ fontSize: '.85rem', color: 'var(--text-muted)', marginBottom: '14px' }}>Set default minimum stock levels for alert generation.</p>
-          <div className="form-row">
-            <div className="form-group"><label>Critical Alert (units)</label><input type="number" defaultValue="5" /></div>
-            <div className="form-group"><label>Low Stock Warning (units)</label><input type="number" defaultValue="15" /></div>
-          </div>
-          <button className="btn btn-primary" onClick={() => alert('Alert settings saved!')}>Save Thresholds</button>
         </div>
       </div>
 
@@ -254,11 +262,11 @@ const Settings = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Email</label>
-                <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="e.g. user@example.com" />
+                <input type="email" name="email" value={form.email} onChange={handleChange} />
               </div>
               <div className="form-group">
                 <label>Phone</label>
-                <input name="phone" value={form.phone} onChange={handleChange} placeholder="e.g. 0991234567" />
+                <input name="phone" value={form.phone} onChange={handleChange} />
               </div>
             </div>
 

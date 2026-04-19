@@ -1,65 +1,105 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../utils/api';
 
 const InventoryContext = createContext();
 
 export const useInventory = () => useContext(InventoryContext);
 
-const initialInventory = [];
-
 export const InventoryProvider = ({ children }) => {
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem('stocksmart_products');
-    return saved ? JSON.parse(saved) : initialInventory;
-  });
+  const [products, setProducts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [transactions, setTransactions] = useState(() => {
-    const saved = localStorage.getItem('stocksmart_transactions');
-    return saved ? JSON.parse(saved) : [];
-  });
+  // Fetch data from backend
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [productsData, transactionsData] = await Promise.all([
+        api.get('/products'),
+        api.get('/inventory/transactions')
+      ]);
+      
+      // Map backend fields to frontend fields
+      const mappedProducts = productsData.map(p => ({
+        ...p,
+        cat: p.category,
+        min: p.minStockLevel
+      }));
 
-  // Save changes to localStorage
-  useEffect(() => {
-    localStorage.setItem('stocksmart_products', JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem('stocksmart_transactions', JSON.stringify(transactions));
-  }, [transactions]);
-
-  const addProduct = (product) => {
-    const newProduct = { ...product, id: `PRD-${String(products.length + 1).padStart(3, '0')}` };
-    setProducts([...products, newProduct]);
+      setProducts(mappedProducts);
+      setTransactions(transactionsData);
+    } catch (error) {
+      console.error('Failed to fetch inventory data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateProduct = (id, updates) => {
-    setProducts(products.map(p => p.id === id ? { ...p, ...updates } : p));
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const addProduct = async (product) => {
+    try {
+      const backendProduct = {
+        name: product.name,
+        cat: product.cat,
+        price: product.price,
+        stock: product.stock,
+        min: product.min,
+        emoji: product.emoji,
+        image: product.image,
+        supplier: product.supplier,
+        notes: product.notes
+      };
+
+      await api.post('/products', backendProduct);
+      
+      // Refresh everything from backend to ensure we have the real IDs and transactions
+      await fetchData();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to add product:', error);
+      return { success: false, message: error.message };
+    }
   };
 
-  const recordTransaction = (productId, type, qty, user, note) => {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-    
-    const qtyNum = parseInt(qty, 10);
-    const before = product.stock;
-    const after = type === 'IN' ? before + qtyNum : before - qtyNum;
-    
-    // Update product stock
-    updateProduct(productId, { stock: Math.max(0, after) });
-    
-    // Record transaction
-    const newTxn = {
-      id: `TXN-${String(transactions.length + 1).padStart(4, '0')}`,
-      productId,
-      productName: product.name,
-      type,
-      qty: qtyNum,
-      before,
-      after: Math.max(0, after),
-      date: new Date().toISOString(),
-      user: user || 'System',
-      note
-    };
-    setTransactions([newTxn, ...transactions]);
+  const updateProduct = async (id, updates) => {
+    try {
+      const backendUpdates = { ...updates };
+      const updatedProduct = await api.put(`/products/${id}`, backendUpdates);
+      
+      // Refresh from backend
+      await fetchData();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to update product:', error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  const recordTransaction = async (productId, type, qty, user, note) => {
+    try {
+      const txnData = {
+        productId,
+        type,
+        qty: parseInt(qty, 10),
+        user: user || 'System',
+        notes: note
+      };
+
+      await api.post('/inventory/transaction', txnData);
+      
+      // Refresh from backend
+      await fetchData();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to record transaction:', error);
+      return { success: false, message: error.message };
+    }
   };
 
   const getLowStockProducts = () => {
@@ -71,6 +111,8 @@ export const InventoryProvider = ({ children }) => {
       products, addProduct, updateProduct,
       transactions, recordTransaction,
       getLowStockProducts,
+      loading,
+      refreshData: fetchData
     }}>
       {children}
     </InventoryContext.Provider>

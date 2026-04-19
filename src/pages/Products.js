@@ -52,18 +52,18 @@ const Products = () => {
     return e;
   };
 
-  const handleSubmit = () => {
+  const handleSave = async () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
 
     const existing = products.find(p => p.name.trim().toLowerCase() === form.name.trim().toLowerCase());
 
     if (existing) {
-      updateProduct(existing.id, {
+      await updateProduct(existing.id, {
         stock: existing.stock + Number(form.stock),
       });
     } else {
-      addProduct({
+      await addProduct({
         name: form.name.trim(),
         cat: form.cat,
         price: Number(form.price),
@@ -95,8 +95,8 @@ const Products = () => {
     setEditForm(f => ({ ...f, [name]: value }));
   };
 
-  const handleEditSave = () => {
-    updateProduct(editProduct.id, {
+  const handleEditSave = async () => {
+    await updateProduct(editProduct.id, {
       name: editForm.name.trim(),
       cat: editForm.cat,
       price: Number(editForm.price),
@@ -107,9 +107,9 @@ const Products = () => {
     setEditProduct(null);
   };
 
-  const handleStockSave = () => {
+  const handleStockSave = async () => {
     if (!stockForm.productId || !stockForm.qty) return;
-    recordTransaction(stockForm.productId, stockForm.type, stockForm.qty, null, stockForm.notes);
+    await recordTransaction(stockForm.productId, stockForm.type, stockForm.qty, null, stockForm.notes);
     setStockProduct(false);
     setStockForm({ type: 'IN', productId: '', qty: '', date: '', notes: '' });
   };
@@ -322,7 +322,7 @@ const Products = () => {
           </div>
           <div className="modal-footer">
             <button className="btn btn-outline" onClick={handleClose}>Cancel</button>
-            <button className="btn btn-primary" onClick={handleSubmit}>Add Product</button>
+            <button className="btn btn-primary" onClick={handleSave}>Add Product</button>
           </div>
         </div>
       </div>

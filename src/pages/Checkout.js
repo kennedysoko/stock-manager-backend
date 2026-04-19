@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {
   Search, ShoppingCart, Minus, Plus, X,
-  CreditCard, Trash2, Printer, Receipt, Tag, Smartphone, Banknote, MoreHorizontal,
+  CreditCard, Trash2, Tag, Smartphone, Banknote, MoreHorizontal,
 } from 'lucide-react';
 import { useInventory } from '../context/InventoryContext';
 import { usePos } from '../context/PosContext';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
 
 /* ── Payment methods available in Malawi ── */
 const PAYMENT_METHODS = [
@@ -29,6 +30,7 @@ const Checkout = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [amountTendered, setAmountTendered] = useState('');
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const categories = ['All', 'Beverages', 'Staples', 'Dairy', 'Cooking', 'Bakery', 'Snacks'];
 
@@ -38,16 +40,15 @@ const Checkout = () => {
   );
 
   const { subtotal, total, discount: validDiscount } = getTotals();
-  const cartQty = cart.reduce((s, i) => s + i.qty, 0);
 
   /* ── complete sale ── */
   const handleInitiateSideCheckout = () => {
     setIsConfirming(true);
   };
 
-  const handleConfirmSale = () => {
+  const handleConfirmSale = async () => {
     const selectedMethod = PAYMENT_METHODS.find(m => m.id === paymentMethod);
-    const data = processCheckout({ paymentMethod: selectedMethod?.label || 'Cash' });
+    const data = await processCheckout({ paymentMethod: selectedMethod?.label || 'Cash' });
     if (data) {
       setReceiptData(data);
       setIsConfirming(false);
@@ -85,15 +86,24 @@ const Checkout = () => {
           ──────────────────────────────────── */}
           <div className="pos-products-panel">
 
-            {/* Search bar */}
-            <div className="pos-search-bar">
-              <Search size={18} style={{ color: 'var(--text-light)' }} />
-              <input
-                type="text"
-                placeholder="Search product by name…"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
+            {/* Search bar and Scan Button */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+              <div className="pos-search-bar" style={{ flex: 1, margin: 0 }}>
+                <Search size={18} style={{ color: 'var(--text-light)' }} />
+                <input
+                  type="text"
+                  placeholder="Search product by name or ID…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+              <button 
+                className="btn btn-outline" 
+                onClick={() => setIsScannerOpen(true)} 
+                style={{ padding: '0 15px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                📷 Scan
+              </button>
             </div>
 
             {/* Category pills */}
@@ -241,6 +251,20 @@ const Checkout = () => {
           </div>{/* /cart-panel */}
 
         </div>{/* /pos-layout */}
+
+        <BarcodeScannerModal 
+          isOpen={isScannerOpen} 
+          onClose={() => setIsScannerOpen(false)} 
+          onScan={(code) => {
+            setIsScannerOpen(false);
+            const product = products.find(p => p.id === code || p.name.toLowerCase().includes(code.toLowerCase()));
+            if (product) {
+              addToCart(product.id);
+            } else {
+              alert(`Product not found for scan: ${code}`);
+            }
+          }} 
+        />
       </section>
 
 
@@ -278,10 +302,10 @@ const Checkout = () => {
               {/* Body */}
               <div className="receipt-body">
                 <div className="receipt-meta">
-                  <span>{new Date(receiptData.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                  <span>{receiptData.ref}</span>
+                  <span>{new Date(modalData.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                  <span>{modalData.ref}</span>
                 </div>
-                <div style={{ fontSize: '.82rem', marginBottom: '10px' }}>Customer: <strong>{receiptData.customer}</strong></div>
+                <div style={{ fontSize: '.82rem', marginBottom: '10px' }}>Customer: <strong>{modalData.customer}</strong></div>
                 <div className="receipt-items">
                   {modalData.items.map((item, idx) => (
                     <React.Fragment key={idx}>
@@ -311,6 +335,41 @@ const Checkout = () => {
                     <span>MK {modalData.total.toLocaleString()}</span>
                   </div>
                 </div>
+
+                {/* Payment Selection for Checkout */}
+                {!isReceipt && (
+                  <div className="payment-selection" style={{ marginTop: '15px', borderTop: '1px dashed var(--border-color)', paddingTop: '15px' }}>
+                    <div style={{ marginBottom: '10px', fontSize: '.85rem', fontWeight: 600 }}>Select Payment Method:</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '15px' }}>
+                      {PAYMENT_METHODS.map(method => {
+                        const Icon = method.icon;
+                        return (
+                          <button
+                            key={method.id}
+                            className={`btn ${paymentMethod === method.id ? 'btn-primary' : 'btn-outline'}`}
+                            style={{ padding: '8px 4px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                            onClick={() => setPaymentMethod(method.id)}
+                          >
+                            <Icon size={16} />
+                            {method.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {paymentMethod === 'cash' && (
+                      <div style={{ marginBottom: '5px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '5px' }}>Amount Tendered (MK):</label>
+                        <input
+                          type="number"
+                          placeholder="Enter amount given"
+                          value={amountTendered}
+                          onChange={e => setAmountTendered(e.target.value)}
+                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Footer */}
@@ -318,8 +377,24 @@ const Checkout = () => {
 
               {/* Actions */}
               <div className="receipt-actions">
-                <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setReceiptData(null)}>Close</button>
-                <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => alert('Printing...')}>🖨 Print</button>
+                {isReceipt ? (
+                  <>
+                    <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={closeReceipt}>Close</button>
+                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => alert('Printing...')}>🖨 Print</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={handleCancelSale}>Cancel</button>
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ flex: 1, justifyContent: 'center' }} 
+                      onClick={handleConfirmSale}
+                      disabled={!canConfirm}
+                    >
+                      Confirm Sale
+                    </button>
+                  </>
+                )}
               </div>
 
             </div>

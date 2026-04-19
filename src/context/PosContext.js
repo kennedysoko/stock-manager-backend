@@ -1,24 +1,21 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useInventory } from './InventoryContext';
 import { useAuth } from './AuthContext';
+import { api } from '../utils/api';
 
 const PosContext = createContext();
 
 export const usePos = () => useContext(PosContext);
 
 export const PosProvider = ({ children }) => {
-  const { products, recordTransaction } = useInventory();
+  const { products, refreshData } = useInventory();
   const { user } = useAuth();
   
   const [cart, setCart] = useState([]);
   const [discount, setDiscount] = useState(0);
   const [customer, setCustomer] = useState('');
   
-  const [saleCounter, setSaleCounter] = useState(() => {
-    return parseInt(localStorage.getItem('stocksmart_salecounter') || '100', 10);
-  });
-  
-  const currentRef = `#SALE-${saleCounter + 1}`;
+  const currentRef = "New Sale";
 
   const addToCart = (productId) => {
     const product = products.find(p => p.id === productId);
@@ -44,7 +41,7 @@ export const PosProvider = ({ children }) => {
       setCart(cart.filter(i => i.id !== productId));
       return;
     }
-    if (newQty > product.stock) return; // Prevent over-adding
+    if (newQty > product.stock) return;
     
     setCart(cart.map(i => i.id === productId ? { ...i, qty: newQty } : i));
   };
@@ -65,36 +62,34 @@ export const PosProvider = ({ children }) => {
     return { subtotal, discount: validDiscount, total: subtotal - validDiscount };
   };
 
-  const processCheckout = ({ paymentMethod = 'Cash' } = {}) => {
+  const processCheckout = async ({ paymentMethod = 'Cash' } = {}) => {
     if (cart.length === 0) return null;
     
-    const totals = getTotals();
-    const customerName = customer.trim() || 'Walk-in Customer';
-    const userName = user?.name || 'Cashier';
-    
-    // Deduct stock and record transactions
-    cart.forEach(item => {
-      recordTransaction(item.id, 'OUT', item.qty, userName, `POS Sale ${currentRef}`);
-    });
-    
-    const receiptData = {
-      ref: currentRef,
-      date: new Date().toISOString(),
-      customer: customerName,
-      paymentMethod,
-      items: [...cart],
-      ...totals
-    };
-    
-    // Increment tracker
-    const newCounter = saleCounter + 1;
-    setSaleCounter(newCounter);
-    localStorage.setItem('stocksmart_salecounter', String(newCounter));
-    
-    // Empty cart
-    clearCart();
-    
-    return receiptData;
+    try {
+      const checkoutData = {
+        cart: cart.map(item => ({
+          productId: item.id,
+          qty: item.qty
+        })),
+        discount: parseFloat(discount) || 0,
+        customer: customer.trim() || 'Walk-in Customer',
+        user: user?.name || 'Cashier'
+      };
+
+      const result = await api.post('/checkout/process', checkoutData);
+      
+      // Inject payment method into result for receipt display
+      const receipt = { ...result, paymentMethod };
+      
+      refreshData();
+      clearCart();
+      
+      return receipt;
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      alert('Checkout failed: ' + error.message);
+      return null;
+    }
   };
 
   return (

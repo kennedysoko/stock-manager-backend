@@ -7,9 +7,10 @@ const Login = () => {
   const [password, setPassword] = useState('password123');
   const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (!login(email, password)) {
+    const success = await login(email, password);
+    if (!success) {
       setError('Invalid credentials');
     }
   };
